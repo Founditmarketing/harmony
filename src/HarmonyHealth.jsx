@@ -222,6 +222,18 @@ export default function HarmonyHealth() {
   const statsRef = useRef(null);
   const heroVideoRef = useRef(null);
   const [heroVideoVisible, setHeroVideoVisible] = useState(false);
+  /** Portrait phones + tall viewports: video crops poorly and burns data — use framed still instead */
+  const [heroMobileStill, setHeroMobileStill] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 720px)");
+    const sync = () => setHeroMobileStill(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), reduced ? 250 : 1500);
@@ -229,7 +241,7 @@ export default function HarmonyHealth() {
   }, [reduced]);
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || heroMobileStill) return;
     const el = heroVideoRef.current;
     if (!el) return;
     const show = () => setHeroVideoVisible(true);
@@ -241,7 +253,7 @@ export default function HarmonyHealth() {
       el.removeEventListener("playing", show);
       el.removeEventListener("loadeddata", show);
     };
-  }, [reduced]);
+  }, [reduced, heroMobileStill]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -442,9 +454,9 @@ export default function HarmonyHealth() {
 
       <main id="main">
         {/* HERO — full-bleed video background, editorial overlay */}
-        <header id="top" className="hero-v2">
+        <header id="top" className={`hero-v2${heroMobileStill ? " hero-v2--mobile-still" : ""}`}>
           <div className="hero-v2-bg">
-            {!reduced ? (
+            {!reduced && !heroMobileStill ? (
               <video
                 ref={heroVideoRef}
                 className={`hero-v2-video${heroVideoVisible ? " hero-v2-video--visible" : ""}`}
@@ -464,6 +476,7 @@ export default function HarmonyHealth() {
                 aria-hidden="true"
                 decoding="async"
                 fetchPriority="high"
+                className={heroMobileStill ? "hero-v2-still hero-v2-still--mobile" : "hero-v2-still hero-v2-still--reduced"}
               />
             )}
             <div className="hero-v2-veil" />
@@ -1245,16 +1258,44 @@ const styles = `
   position: absolute; inset: 0; z-index: 0;
   overflow: hidden;
 }
-.hero-v2-bg img,
 .hero-v2-bg video {
   width: 100%; height: 100%;
   object-fit: cover;
   object-position: center center;
   display: block;
   filter: saturate(1.06) contrast(1.04);
-  /* Strong crop — encoded letterboxing needs zoom past cover */
   transform: scale(1.52);
   transform-origin: center center;
+}
+.hero-v2-still {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hero-v2-still--reduced {
+  object-position: center center;
+  filter: saturate(1.06) contrast(1.04);
+  transform: scale(1.52);
+  transform-origin: center center;
+}
+/* Mobile / narrow: editorial still — no heavy zoom, anchor upper-third so faces/architecture read */
+.hero-v2-still--mobile {
+  object-position: center 28%;
+  transform: scale(1.06);
+  transform-origin: center 28%;
+  filter: saturate(1.08) contrast(1.05) brightness(0.9);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-v2-still--mobile {
+    animation: hero-mobile-kb 22s ease-in-out infinite alternate;
+  }
+}
+@keyframes hero-mobile-kb {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-v2-still--mobile { animation: none !important; transform: scale(1.06); }
 }
 .hero-v2-video {
   will-change: transform, opacity;
@@ -1775,16 +1816,12 @@ const styles = `
 }
 
 @media (max-width: 720px) {
-  /* HERO MOBILE */
+  /* HERO MOBILE — video omitted; still uses .hero-v2-still--mobile */
   .hero-v2 { min-height: 100vh; }
-  .hero-v2-bg img,
-  .hero-v2-bg video {
-    filter: saturate(1.05) contrast(1.04) brightness(0.82);
-    transform: scale(1.68);
-  }
-  .hero-v2-veil {
+  .hero-v2--mobile-still .hero-v2-veil {
     background:
-      linear-gradient(180deg, rgba(6,28,52,0.55) 0%, rgba(6,28,52,0.35) 30%, rgba(6,28,52,0.7) 70%, rgba(6,28,52,0.95) 100%);
+      linear-gradient(185deg, rgba(6,28,52,0.35) 0%, rgba(6,28,52,0.22) 28%, rgba(6,28,52,0.55) 62%, rgba(6,28,52,0.94) 100%),
+      linear-gradient(105deg, rgba(6,28,52,0.82) 0%, rgba(6,28,52,0.35) 38%, transparent 72%);
   }
   .hero-v2-vignette { display: none; }
   .hero-v2-content {
