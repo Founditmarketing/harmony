@@ -1,3 +1,14 @@
+import aaronMitchellImg from "../assets/images/providers/aaron-mitchell.jpg";
+import stephenAndyRohrerImg from "../assets/images/providers/stephen-andy-rohrer.jpg";
+import hongVanNguyenImg from "../assets/images/providers/hong-van-nguyen.jpg";
+import ericaDeweyImg from "../assets/images/providers/erica-dewey.jpg";
+import zoeWeeksImg from "../assets/images/providers/zoe-weeks.jpeg";
+import seanKochImg from "../assets/images/providers/sean-koch.jpg";
+import jillDavisImg from "../assets/images/providers/jill-davis.jpg";
+import jodiRenigarImg from "../assets/images/providers/jodi-renigar.jpg";
+import whitneyReedImg from "../assets/images/providers/whitney-reed.jpg";
+import erinOguinImg from "../assets/images/providers/erin-oguin.jpg";
+
 export const LOCATIONS = [
   {
     key: "wynne",
@@ -108,7 +119,7 @@ export const PROVIDERS = [
     tags: ["wynne", "primary"],
     accepting: true,
     featured: true,
-    img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=800&q=80&auto=format&fit=crop",
+    img: aaronMitchellImg,
     bio: "Methodist Hospital Physician Leadership Academy delegate, recognized among the top 20 physicians in greater Memphis. Led the team to Level 3 PCMH Certification and Hypertension Champion recognition.",
     education: ["UAMS, Doctor of Medicine", "UAMS Family Medicine Residency, Jonesboro AR", "MBA, University of Arkansas at Little Rock"],
   },
@@ -119,7 +130,7 @@ export const PROVIDERS = [
     tags: ["wynne", "primary", "wound"],
     accepting: true,
     featured: true,
-    img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&q=80&auto=format&fit=crop",
+    img: stephenAndyRohrerImg,
     bio: "Fifteen plus years in healthcare. Trained at UAB and UCA. Board certified in hospital medicine, family medicine, and advanced wound management. Dedicated to better access for the Delta.",
     education: ["MSN, University of Alabama Birmingham", "BSN, University of Central Arkansas"],
   },
@@ -130,7 +141,7 @@ export const PROVIDERS = [
     tags: ["wynne", "pediatrics", "spanish"],
     accepting: true,
     languages: ["English", "Vietnamese", "Spanish"],
-    img: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=800&q=80&auto=format&fit=crop",
+    img: hongVanNguyenImg,
     bio: "From New Orleans. Medical degree from LSU New Orleans, pediatric residency at UAMS Little Rock with training at Arkansas Children Hospital. Believes in calm child-friendly visits.",
     education: ["LSU New Orleans, Doctor of Medicine", "UAMS Pediatric Residency"],
   },
@@ -141,7 +152,7 @@ export const PROVIDERS = [
     tags: ["lonoke", "primary", "womens", "pediatrics", "spanish"],
     accepting: true,
     languages: ["English", "Spanish"],
-    img: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=800&q=80&auto=format&fit=crop",
+    img: ericaDeweyImg,
     bio: "Born and raised in Arkansas. UAMS medical school. Chief resident at Baptist Health-UAMS in North Little Rock. Passionate about women health, pediatrics, and chronic disease management.",
     education: ["UAMS, Doctor of Medicine", "Baptist Health-UAMS Residency, Chief Resident"],
   },
@@ -151,7 +162,7 @@ export const PROVIDERS = [
     specialty: "Combined Med-Peds",
     tags: ["scott", "primary", "pediatrics"],
     accepting: true,
-    img: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=800&q=80&auto=format&fit=crop",
+    img: zoeWeeksImg,
     bio: "Northeast Arkansas native. Taught 7th grade math through Teach For America before medical school. UAMS 2020. IM-Peds residency at UTHSC Memphis with training at St. Jude and Le Bonheur.",
     education: ["UAMS, Doctor of Medicine 2020", "UTHSC Memphis IM-Peds Residency"],
   },
@@ -161,7 +172,7 @@ export const PROVIDERS = [
     specialty: "Evidence-Based Primary Care",
     tags: ["wynne", "primary"],
     accepting: true,
-    img: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=800&q=80&auto=format&fit=crop",
+    img: seanKochImg,
     bio: "Born in St. Louis, raised in Searcy. Harding University undergrad, UAMS medical school, three-year residency in Jonesboro.",
     education: ["UAMS, Doctor of Medicine", "Jonesboro Family Medicine Residency"],
   },
@@ -171,7 +182,7 @@ export const PROVIDERS = [
     specialty: "MSN-RN, APRN, PNP-PC",
     tags: ["wynne", "pediatrics"],
     accepting: true,
-    img: "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=800&q=80&auto=format&fit=crop",
+    img: jillDavisImg,
     bio: "Wynne native. Inaugural class of the accelerated BSN at Arkansas State. Former LeBonheur Trauma ER nurse and Wynne Public Schools district nurse before her MSN at UAMS in 2018.",
     education: ["UAMS, MSN 2018", "Arkansas State University, BSN 2008"],
   },
@@ -181,7 +192,7 @@ export const PROVIDERS = [
     specialty: "MSN-RN, FNP-BC, Women Health",
     tags: ["wynne", "primary", "urgent", "womens", "pediatrics"],
     accepting: true,
-    img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&q=80&auto=format&fit=crop",
+    img: jodiRenigarImg,
     bio: "From Saint Francis County. Crowley Ridge LPN to EACC RN to Walden University MSN. Board certified in family practice with women health focus.",
     education: ["MSN, Walden University 2023"],
   },
@@ -191,7 +202,7 @@ export const PROVIDERS = [
     specialty: "Family Practice, Board Certified",
     tags: ["lonoke", "primary", "urgent"],
     accepting: true,
-    img: "https://images.unsplash.com/photo-1638202993928-7267aad84c31?w=800&q=80&auto=format&fit=crop",
+    img: whitneyReedImg,
     bio: "From Cabot. UAMS BSN 11, MSN 15. A decade of experience in primary and urgent care. Loves the Lonoke community.",
     education: ["UAMS, MSN 2015", "UAMS, BSN 2011"],
   },
@@ -201,7 +212,7 @@ export const PROVIDERS = [
     specialty: "Family Practice, Patient-Centered Care",
     tags: ["wynne", "primary"],
     accepting: true,
-    img: "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=800&q=80&auto=format&fit=crop",
+    img: erinOguinImg,
     bio: "Began at Arkansas State, master in nursing from Harding. Empowering patients across acute conditions, chronic illness, and prevention.",
     education: ["MSN, Harding University", "Arkansas State University"],
   },
