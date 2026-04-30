@@ -1225,15 +1225,19 @@ const styles = `
   background: var(--forest-deep);
   isolation: isolate;
 }
-.hero-v2-bg { position: absolute; inset: 0; z-index: 0; }
+.hero-v2-bg {
+  position: absolute; inset: 0; z-index: 0;
+  overflow: hidden;
+}
 .hero-v2-bg img,
 .hero-v2-bg video {
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center center;
   display: block;
   filter: saturate(1.06) contrast(1.04);
-  transform: scale(1.18);
+  /* Strong crop — encoded letterboxing needs zoom past cover */
+  transform: scale(1.52);
   transform-origin: center center;
 }
 .hero-v2-video { will-change: transform; }
@@ -1741,7 +1745,7 @@ const styles = `
   .hero-v2-bg img,
   .hero-v2-bg video {
     filter: saturate(1.05) contrast(1.04) brightness(0.82);
-    transform: scale(1.25);
+    transform: scale(1.68);
   }
   .hero-v2-veil {
     background:
