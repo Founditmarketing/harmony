@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import heroVideo4k from "../assets/videos/hero-4k.mp4";
 import heroVideoPoster from "../assets/images/hero-video-poster.jpg";
-import heroMobileBg from "../assets/images/hero-mobile.png";
 import deltaCypress from "../assets/images/delta-cypress.jpg";
 import providerCinematic from "../assets/images/provider-cinematic.jpg";
 import clinicCinematic from "../assets/images/clinic-cinematic.jpg";
@@ -473,14 +472,22 @@ export default function HarmonyHealth() {
                 poster={heroVideoPoster}
                 aria-label="Harmony Health Clinic atmospheric footage"
               />
+            ) : heroMobileStill ? (
+              <div className="hero-v2-mobile-design" aria-hidden="true">
+                <div className="hero-v2-mobile-design-nodes" />
+                <div className="hero-v2-mobile-design-grid" />
+                <div className="hero-v2-mobile-design-shard" />
+                <div className="hero-v2-mobile-design-ring hero-v2-mobile-design-ring--a" />
+                <div className="hero-v2-mobile-design-ring hero-v2-mobile-design-ring--b" />
+              </div>
             ) : (
               <img
-                src={heroMobileStill ? heroMobileBg : heroVideoPoster}
+                src={heroVideoPoster}
                 alt=""
                 aria-hidden="true"
                 decoding="async"
                 fetchPriority="high"
-                className={heroMobileStill ? "hero-v2-still hero-v2-still--mobile" : "hero-v2-still hero-v2-still--reduced"}
+                className="hero-v2-still hero-v2-still--reduced"
               />
             )}
             <div className="hero-v2-veil" />
@@ -495,17 +502,31 @@ export default function HarmonyHealth() {
               </span>
             </div>
 
-            <h1 className="hero-v2-headline font-display">
-              <span className="word-rise-stage"><span className="delay-1">A</span></span>{" "}
-              <span className="word-rise-stage"><span className="delay-2">different</span></span>{" "}
-              <span className="word-rise-stage"><span className="delay-3">kind</span></span>
-              <br />
-              <span className="word-rise-stage"><span className="delay-4">of</span></span>{" "}
-              <span className="word-rise-stage"><span className="delay-5"><em>healthcare</em>,</span></span>
-              <br />
-              <span className="word-rise-stage"><span className="delay-6">built</span></span>{" "}
-              <span className="word-rise-stage"><span className="delay-7">for</span></span>{" "}
-              <span className="word-rise-stage"><span className="delay-8">the Delta.</span></span>
+            <h1 className={`hero-v2-headline font-display${heroMobileStill ? " hero-v2-headline--mobile-brand" : ""}`}>
+              {heroMobileStill ? (
+                <>
+                  <span className="hero-v2-mobile-hl-1">{t.hero.mobile_hl_1}</span>
+                  <span className="hero-v2-mobile-hl-rule" aria-hidden="true" />
+                  <span className="hero-v2-mobile-hl-2">
+                    {t.hero.mobile_hl_2_before}
+                    <em>{t.hero.mobile_hl_2_em}</em>
+                    {t.hero.mobile_hl_2_after}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="word-rise-stage"><span className="delay-1">A</span></span>{" "}
+                  <span className="word-rise-stage"><span className="delay-2">different</span></span>{" "}
+                  <span className="word-rise-stage"><span className="delay-3">kind</span></span>
+                  <br />
+                  <span className="word-rise-stage"><span className="delay-4">of</span></span>{" "}
+                  <span className="word-rise-stage"><span className="delay-5"><em>healthcare</em>,</span></span>
+                  <br />
+                  <span className="word-rise-stage"><span className="delay-6">built</span></span>{" "}
+                  <span className="word-rise-stage"><span className="delay-7">for</span></span>{" "}
+                  <span className="word-rise-stage"><span className="delay-8">the Delta.</span></span>
+                </>
+              )}
             </h1>
 
             <p className="hero-v2-lead reveal" style={{ animationDelay: "1.0s" }}>
@@ -1306,13 +1327,110 @@ const styles = `
   transform: scale(1.52);
   transform-origin: center center;
 }
-/* Mobile hero photo — panoramic; anchor left for blue-wall framing; no zoom */
-.hero-v2-still--mobile {
-  object-position: 26% 46%;
-  transform: none;
-  transform-origin: 26% 46%;
-  filter: saturate(1.06) contrast(1.04) brightness(0.92);
+/* Mobile hero — abstract mesh (no photo) */
+.hero-v2-mobile-design {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(168deg, #030911 0%, #07172d 32%, #0c3566 68%, #061424 100%);
 }
+.hero-v2-mobile-design-nodes {
+  position: absolute;
+  inset: -22%;
+  background:
+    radial-gradient(ellipse 72% 58% at 12% 28%, rgba(56, 189, 248, 0.42) 0%, transparent 56%),
+    radial-gradient(ellipse 58% 48% at 88% 18%, rgba(61, 143, 217, 0.32) 0%, transparent 52%),
+    radial-gradient(ellipse 95% 72% at 48% 108%, rgba(21, 101, 201, 0.5) 0%, transparent 58%),
+    radial-gradient(ellipse 45% 40% at 72% 62%, rgba(125, 211, 252, 0.14) 0%, transparent 60%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-v2-mobile-design-nodes {
+    animation: hero-mobile-mesh-drift 24s ease-in-out infinite alternate;
+  }
+}
+@keyframes hero-mobile-mesh-drift {
+  from { transform: translate3d(-2%, 0, 0) scale(1); }
+  to { transform: translate3d(3%, -2.5%, 0) scale(1.07); }
+}
+.hero-v2-mobile-design-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image:
+    linear-gradient(rgba(186, 230, 253, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(186, 230, 253, 0.4) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 95% 75% at 45% 42%, #000 18%, transparent 78%);
+}
+.hero-v2-mobile-design-shard {
+  position: absolute;
+  width: 145%;
+  height: 52%;
+  left: -38%;
+  bottom: -10%;
+  border-radius: 50%;
+  background: linear-gradient(
+    118deg,
+    rgba(167, 223, 255, 0.22) 0%,
+    rgba(56, 189, 248, 0.1) 42%,
+    transparent 72%
+  );
+  transform: rotate(-9deg);
+}
+.hero-v2-mobile-design-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero-v2-mobile-design-ring--a {
+  width: min(118vw, 640px);
+  height: min(118vw, 640px);
+  border: 1px solid rgba(125, 211, 252, 0.14);
+  box-shadow:
+    inset 0 0 100px rgba(56, 189, 248, 0.07),
+    0 0 80px rgba(56, 189, 248, 0.05);
+  top: -38%;
+  right: -28%;
+}
+.hero-v2-mobile-design-ring--b {
+  width: min(72vw, 380px);
+  height: min(72vw, 380px);
+  border: 1px solid rgba(186, 230, 253, 0.09);
+  bottom: 8%;
+  left: -18%;
+}
+
+.hero-v2-headline--mobile-brand {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 100%;
+  line-height: 1.06;
+}
+.hero-v2-mobile-hl-1 {
+  font-size: clamp(1.95rem, 8.5vw, 2.85rem);
+  letter-spacing: -0.034em;
+  font-weight: 400;
+}
+.hero-v2-mobile-hl-rule {
+  width: 2.75rem;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(186, 230, 253, 0.95), rgba(56, 189, 248, 0.35), transparent);
+}
+.hero-v2-mobile-hl-2 {
+  font-size: clamp(1.42rem, 5.6vw, 2.05rem);
+  letter-spacing: -0.024em;
+  color: rgba(248, 251, 254, 0.9);
+  font-weight: 400;
+  line-height: 1.2;
+}
+.hero-v2-mobile-hl-2 em {
+  color: var(--terracotta-pale);
+  font-style: italic;
+  font-weight: 400;
+}
+
 .hero-v2-video {
   will-change: transform, opacity;
   background: var(--forest-deep);
@@ -1835,12 +1953,12 @@ const styles = `
 }
 
 @media (max-width: 720px) {
-  /* HERO MOBILE — video omitted; still uses .hero-v2-still--mobile */
+  /* HERO MOBILE — abstract mesh bg + alternate headline */
   .hero-v2 { min-height: 100vh; }
   .hero-v2--mobile-still .hero-v2-veil {
     background:
-      linear-gradient(185deg, rgba(6,28,52,0.35) 0%, rgba(6,28,52,0.22) 28%, rgba(6,28,52,0.55) 62%, rgba(6,28,52,0.94) 100%),
-      linear-gradient(105deg, rgba(6,28,52,0.82) 0%, rgba(6,28,52,0.35) 38%, transparent 72%);
+      linear-gradient(185deg, rgba(6,28,52,0.28) 0%, rgba(6,28,52,0.12) 35%, rgba(6,28,52,0.45) 62%, rgba(6,28,52,0.88) 100%),
+      linear-gradient(105deg, rgba(6,28,52,0.72) 0%, rgba(6,28,52,0.22) 42%, transparent 76%);
   }
   .hero-v2-vignette { display: none; }
   .hero-v2-content {
@@ -1854,6 +1972,10 @@ const styles = `
     font-size: clamp(2rem, 10.5vw, 3.6rem);
     line-height: 0.98;
     max-width: 100%;
+  }
+  .hero-v2-headline--mobile-brand {
+    gap: 0.65rem;
+    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.35);
   }
   .hero-v2-headline em { padding-right: 0.04em; }
   .hero-v2-lead { font-size: 1rem; line-height: 1.6; max-width: 100%; }
