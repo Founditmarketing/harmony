@@ -1306,11 +1306,11 @@ const styles = `
   transform: scale(1.52);
   transform-origin: center center;
 }
-/* Mobile hero photo — panoramic; anchor right; static crop (no Ken Burns drift) */
+/* Mobile hero photo — panoramic; anchor left for blue-wall framing; no zoom */
 .hero-v2-still--mobile {
-  object-position: 76% 44%;
-  transform: scale(1.04);
-  transform-origin: 76% 44%;
+  object-position: 26% 46%;
+  transform: none;
+  transform-origin: 26% 46%;
   filter: saturate(1.06) contrast(1.04) brightness(0.92);
 }
 .hero-v2-video {
