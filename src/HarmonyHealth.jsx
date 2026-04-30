@@ -437,11 +437,9 @@ export default function HarmonyHealth() {
           </button>
         </div>
         <nav className="m-menu-nav" aria-label="Mobile menu">
-          <button onClick={() => scrollTo("services")}><span className="font-mono">01</span><span className="font-display">{t.nav.services}</span></button>
-          <button onClick={() => scrollTo("team")}><span className="font-mono">02</span><span className="font-display">{t.nav.team}</span></button>
-          <button onClick={() => scrollTo("locations")}><span className="font-mono">03</span><span className="font-display">{t.nav.locations}</span></button>
-          <button onClick={() => scrollTo("wound-care")}><span className="font-mono">04</span><span className="font-display">{t.nav.wound}</span></button>
-          <button onClick={() => scrollTo("faq")}><span className="font-mono">05</span><span className="font-display">{t.nav.faq}</span></button>
+          <button onClick={() => scrollTo("services")}><span className="font-mono">01</span><span className="font-display">Find Care</span></button>
+          <button onClick={() => scrollTo("locations")}><span className="font-mono">02</span><span className="font-display">{t.nav.locations}</span></button>
+          <button onClick={() => { setNavOpen(false); openBooking({}); }}><span className="font-mono">03</span><span className="font-display">{t.nav.book}</span></button>
         </nav>
         <div className="m-menu-foot">
           <a className="m-menu-portal" href="https://epicconnect.org/ccprd/CommunityConnect/mychartcc.html" target="_blank" rel="noreferrer">
@@ -601,7 +599,7 @@ export default function HarmonyHealth() {
         </header>
 
         {/* EDITORIAL PULL QUOTE — full-bleed sand */}
-        <section className="pullquote">
+        <section className="pullquote mobile-prune">
           <div className="container">
             <blockquote className="pullquote-text font-display">
               <span aria-hidden="true" className="pullquote-mark">"</span>
@@ -771,7 +769,7 @@ export default function HarmonyHealth() {
         <InsuranceChecker t={t} plans={INSURANCE} />
 
         {/* NUMBERS AS ART — drenched forest */}
-        <section ref={statsRef} className="stats-art">
+        <section ref={statsRef} className="stats-art mobile-prune">
           <div className="container-wide">
             <div className="stats-art-head">
               <span className="font-mono small-label">BY THE NUMBERS · 2026</span>
@@ -811,7 +809,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* URGENT VS ER */}
-        <section id="urgent-er" className="urgent-er">
+        <section id="urgent-er" className="urgent-er mobile-prune">
           <div className="container">
             <Reveal className="section-head">
               <div>
@@ -898,7 +896,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* WOUND CARE — drenched terracotta */}
-        <section id="wound-care" className="wound-drenched">
+        <section id="wound-care" className="wound-drenched mobile-prune">
           <div className="container wound-grid">
             <div>
               <span className="eyebrow eyebrow-light">Advanced wound care</span>
@@ -922,7 +920,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* TEAM */}
-        <section id="team" className="team">
+        <section id="team" className="team mobile-prune">
           <div className="container">
             <Reveal className="section-head">
               <div>
@@ -966,7 +964,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* RECOGNITIONS */}
-        <section className="recognitions">
+        <section className="recognitions mobile-prune">
           <div className="container">
             <span className="font-mono small-label" style={{ color: "rgba(252,248,238,0.6)" }}>RECOGNIZED FOR</span>
             <div className="recognition-grid">
@@ -981,7 +979,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* FOUNDER */}
-        <section className="founder">
+        <section className="founder mobile-prune">
           <div className="container founder-grid">
             <figure className="founder-photo">
               <img src={founderPortrait} alt="Stephen Andy Rohrer, cofounder" />
@@ -1003,7 +1001,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* TESTIMONIALS — drenched */}
-        <section className="testimonials">
+        <section className="testimonials mobile-prune">
           <div className="container testimonials-grid">
             <div>
               <span className="eyebrow eyebrow-light">{t.reviews.eyebrow}</span>
@@ -1076,7 +1074,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* RESOURCES */}
-        <section className="resources">
+        <section className="resources mobile-prune">
           <div className="container">
             <div className="section-head">
               <div>
@@ -1102,7 +1100,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* FAQ */}
-        <section id="faq" className="faq">
+        <section id="faq" className="faq mobile-prune">
           <div className="container faq-grid">
             <div>
               <span className="eyebrow">{t.faq.eyebrow}</span>
@@ -1142,7 +1140,7 @@ export default function HarmonyHealth() {
         </section>
 
         {/* CAREERS */}
-        <section className="careers">
+        <section className="careers mobile-prune">
           <div className="container careers-grid">
             <figure className="careers-photo">
               <img src={teamImage} alt="Harmony Health team" />
@@ -1192,8 +1190,8 @@ export default function HarmonyHealth() {
             <span className="font-mono small-label">{t.footer.care.toUpperCase()}</span>
             <ul>
               <li><button onClick={() => scrollTo("services")} className="footer-link">{t.nav.services}</button></li>
-              <li><button onClick={() => scrollTo("team")} className="footer-link">{t.nav.team}</button></li>
-              <li><button onClick={() => scrollTo("wound-care")} className="footer-link">{t.nav.wound}</button></li>
+              <li className="mobile-prune-footer-link"><button onClick={() => scrollTo("team")} className="footer-link">{t.nav.team}</button></li>
+              <li className="mobile-prune-footer-link"><button onClick={() => scrollTo("wound-care")} className="footer-link">{t.nav.wound}</button></li>
               <li><button onClick={() => scrollTo("locations")} className="footer-link">{t.nav.locations}</button></li>
             </ul>
           </div>
@@ -2026,6 +2024,10 @@ const styles = `
 @media (max-width: 720px) {
   /* HERO MOBILE — abstract mesh bg + alternate headline */
   .hero-v2 { min-height: 100vh; }
+  .mobile-prune,
+  .mobile-prune-footer-link {
+    display: none !important;
+  }
   .hero-v2--mobile-still .hero-v2-veil {
     background:
       linear-gradient(185deg, rgba(6,28,52,0.28) 0%, rgba(6,28,52,0.12) 35%, rgba(6,28,52,0.45) 62%, rgba(6,28,52,0.88) 100%),
