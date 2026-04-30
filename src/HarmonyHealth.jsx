@@ -64,6 +64,55 @@ function isOpenNow(d = new Date()) {
   return day >= 1 && day <= 5 && hour >= 8 && hour < 17;
 }
 
+function clinicStatusLine(d = new Date()) {
+  const day = d.getDay();
+  const hour = d.getHours();
+  const min = d.getMinutes();
+  if (day === 0 || day === 6) return { open: false, label: "Opens Mon 8:00 AM" };
+  if (hour >= 8 && hour < 17) {
+    return { open: true, label: `Open now, closes 5:00 PM` };
+  }
+  if (hour < 8) return { open: false, label: "Opens today at 8:00 AM" };
+  if (day === 5) return { open: false, label: "Closed, opens Mon 8:00 AM" };
+  return { open: false, label: "Opens tomorrow at 8:00 AM" };
+}
+
+function timeGreeting(d = new Date()) {
+  const h = d.getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function useScrollReveal(ref, threshold = 0.18) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!ref.current) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold },
+    );
+    obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [ref, threshold]);
+  return visible;
+}
+
+function Reveal({ children, delay = 0, as: Tag = "div", className = "", ...rest }) {
+  const ref = useRef(null);
+  const visible = useScrollReveal(ref);
+  return (
+    <Tag
+      ref={ref}
+      className={`sr ${visible ? "sr-in" : ""} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  );
+}
+
 function jitterWait(loc, seed) {
   const v = (Math.sin(seed * 9301 + (loc.name.length * 11)) * 10000) % 1;
   const offset = Math.abs(v) * loc.waitJitter;
@@ -214,6 +263,7 @@ export default function HarmonyHealth() {
 
   const filteredProviders = useMemo(() => {
     if (providerFilter === "all") return PROVIDERS;
+    if (providerFilter === "accepting") return PROVIDERS.filter((p) => p.accepting);
     return PROVIDERS.filter((p) => p.tags.includes(providerFilter));
   }, [providerFilter]);
 
@@ -226,6 +276,9 @@ export default function HarmonyHealth() {
   const waitMins = jitterWait(currentLoc, waitSeed);
   const wynne = LOCATIONS.find((l) => l.key === "wynne");
   const wynneWait = jitterWait(wynne, waitSeed);
+  const status = clinicStatusLine();
+  const greeting = timeGreeting();
+  const localTime = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);
@@ -251,6 +304,8 @@ export default function HarmonyHealth() {
 
   const filtersTeam = [
     { key: "all", label: t.team.filters_all },
+    { key: "accepting", label: locale === "es" ? "Acepta pacientes" : "Accepting patients" },
+    { key: "spanish", label: "Español" },
     { key: "primary", label: t.team.filters_primary },
     { key: "pediatrics", label: t.team.filters_pediatrics },
     { key: "urgent", label: t.team.filters_urgent },
@@ -347,15 +402,37 @@ export default function HarmonyHealth() {
         </div>
       </div>
 
+      {/* ANNOUNCEMENT MARQUEE */}
+      <div className="announce" aria-hidden="true">
+        <div className="announce-track">
+          {Array.from({ length: 2 }).map((_, dup) => (
+            <div className="announce-row" key={dup}>
+              <span>★ 4.9 average across patient reviews</span>
+              <span className="announce-dot">●</span>
+              <span>Now accepting new patients across all four locations</span>
+              <span className="announce-dot">●</span>
+              <span>Same-week visits available at Wynne</span>
+              <span className="announce-dot">●</span>
+              <span>Spanish-speaking providers available</span>
+              <span className="announce-dot">●</span>
+              <span>MyChart patient portal for refills and messaging</span>
+              <span className="announce-dot">●</span>
+              <span>Advanced wound care led by certified specialists</span>
+              <span className="announce-dot">●</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <main id="main">
         {/* HERO — split-screen, drenched left, full cinematic photo right */}
         <header id="top" className="hero-v2">
           <div className="hero-v2-grid">
             <div className="hero-v2-left grain">
               <div className="hero-v2-meta">
-                <span className="font-mono">EAST ARKANSAS · DELTA REGION</span>
-                <span className={`tag ${openNow ? "tag-live" : "tag-closed"}`}>
-                  {openNow ? `Open · ${wynneWait} min wait at Wynne` : t.hero.meta_closed}
+                <span className="font-mono">EAST ARKANSAS · DELTA · {greeting.toUpperCase()}, {localTime} CT</span>
+                <span className={`tag ${status.open ? "tag-live" : "tag-closed"}`}>
+                  Wynne, {status.label}{status.open ? ` · ${wynneWait} min wait` : ""}
                 </span>
               </div>
 
@@ -386,10 +463,19 @@ export default function HarmonyHealth() {
                 </button>
               </div>
 
-              <div className="hero-v2-foot reveal" style={{ animationDelay: "1.3s" }}>
+              <div className="hero-v2-trust reveal" style={{ animationDelay: "1.28s" }}>
+                <span className="trust-pill">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3Z" /><path d="m9 12 2 2 4-4" /></svg>
+                  PCMH Level 3
+                </span>
+                <span className="trust-pill">Same-day visits</span>
+                <span className="trust-pill">BCBS · Aetna · UHC</span>
+                <span className="trust-pill">Medicare · Medicaid</span>
+              </div>
+              <div className="hero-v2-foot reveal" style={{ animationDelay: "1.4s" }}>
                 <div><strong className="font-display">04</strong><span>locations</span></div>
                 <div><strong className="font-display">12+</strong><span>providers</span></div>
-                <div><strong className="font-display">PCMH</strong><span>Level 3 certified</span></div>
+                <div><strong className="font-display">9+</strong><span>years</span></div>
               </div>
             </div>
 
@@ -444,10 +530,10 @@ export default function HarmonyHealth() {
         {/* INTENT ROUTER */}
         <section className="intent-router">
           <div className="container">
-            <div className="intent-head">
+            <Reveal className="intent-head">
               <span className="eyebrow eyebrow-clay">{t.intent.eyebrow}</span>
               <h2 className="font-display section-headline">{t.intent.title}</h2>
-            </div>
+            </Reveal>
             <div className="intent-grid">
               <button className="intent-card card-lift" onClick={() => openBooking({ reason: "urgent" })}>
                 <div className="intent-num font-display">01</div>
@@ -536,15 +622,15 @@ export default function HarmonyHealth() {
         </section>
 
         {/* URGENT VS ER */}
-        <section className="urgent-er">
+        <section id="urgent-er" className="urgent-er">
           <div className="container">
-            <div className="section-head">
+            <Reveal className="section-head">
               <div>
                 <span className="eyebrow eyebrow-clay">{t.urgent.eyebrow}</span>
                 <h2 className="font-display section-headline">{t.urgent.title_a} <em>{t.urgent.title_em}</em>{t.urgent.title_b}</h2>
               </div>
               <p className="lead">{t.urgent.lead}</p>
-            </div>
+            </Reveal>
             <div className="urgent-grid">
               <article className="urgent-card urgent-uc">
                 <span className="urgent-num font-display">01</span>
@@ -570,13 +656,13 @@ export default function HarmonyHealth() {
         {/* SERVICES */}
         <section id="services" className="services-section">
           <div className="container">
-            <div className="section-head">
+            <Reveal className="section-head">
               <div>
                 <span className="eyebrow">{t.services.eyebrow}</span>
                 <h2 className="font-display section-headline">{t.services.title_a} <em>{t.services.title_em}</em>{t.services.title_b}</h2>
               </div>
               <p className="lead">{t.services.lead}</p>
-            </div>
+            </Reveal>
             <div className="services-grid">
               {SERVICES.map((s, i) => (
                 <article key={s.name} className="service-card card-lift" style={{ animationDelay: `${i * 60}ms` }}>
@@ -623,13 +709,13 @@ export default function HarmonyHealth() {
         {/* TEAM */}
         <section id="team" className="team">
           <div className="container">
-            <div className="section-head">
+            <Reveal className="section-head">
               <div>
                 <span className="eyebrow">{t.team.eyebrow}</span>
                 <h2 className="font-display section-headline">{t.team.title_a} <em>{t.team.title_em}</em>{t.team.title_b}</h2>
               </div>
               <p className="lead">{t.team.lead}</p>
-            </div>
+            </Reveal>
             <div className="filter-row" role="tablist" aria-label="Filter providers">
               {filtersTeam.map((f) => (
                 <button
@@ -647,7 +733,7 @@ export default function HarmonyHealth() {
               {filteredProviders.map((p, i) => (
                 <article key={p.name} className="provider-card card-lift" onClick={() => setOpenProvider(p)} tabIndex={0} role="button" onKeyDown={(e) => { if (e.key === "Enter") setOpenProvider(p); }}>
                   <div className="provider-photo">
-                    <img src={p.img} alt={p.name} loading="lazy" />
+                    <img src={p.img} alt={p.name} loading="lazy" decoding="async" />
                     <div className="provider-photo-veil" />
                     {p.featured && <span className="provider-pill">{t.team.founder}</span>}
                     <span className="provider-num font-mono">№ {String(i + 1).padStart(2, "0")}</span>
@@ -667,13 +753,13 @@ export default function HarmonyHealth() {
         {/* LOCATIONS */}
         <section id="locations" className="locations">
           <div className="container">
-            <div className="section-head">
+            <Reveal className="section-head">
               <div>
                 <span className="eyebrow">{t.locations.eyebrow}</span>
                 <h2 className="font-display section-headline">{t.locations.title_a} <em>{t.locations.title_em}</em> {t.locations.title_b}</h2>
               </div>
               <p className="lead">{t.locations.lead}</p>
-            </div>
+            </Reveal>
             <div className="locations-grid">
               <div className="locations-side">
                 <div className="loc-tabs">
@@ -806,9 +892,19 @@ export default function HarmonyHealth() {
                 </div>
                 <span className="font-mono small-label">{t.reviews.avg}</span>
               </div>
-              <a className="underline-grow" href="https://www.google.com/search?q=Harmony+Health+Clinic+Wynne+AR+reviews" target="_blank" rel="noreferrer" style={{ color: "var(--bone)" }}>{t.reviews.readmore} ↗</a>
+              <a className="t-google" href="https://www.google.com/search?q=Harmony+Health+Clinic+Wynne+AR+reviews" target="_blank" rel="noreferrer">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.44c-.28 1.45-1.13 2.68-2.4 3.5v2.91h3.88c2.27-2.09 3.57-5.18 3.57-8.65z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-2.91c-1.07.72-2.45 1.16-4.05 1.16-3.12 0-5.76-2.1-6.7-4.92H1.3v3.09C3.27 21.31 7.32 24 12 24z" />
+                  <path fill="#FBBC05" d="M5.3 14.42c-.24-.72-.38-1.49-.38-2.42s.14-1.7.38-2.42V6.49H1.3C.47 8.13 0 9.99 0 12s.47 3.87 1.3 5.51l4-3.09z" />
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.32 0 3.27 2.69 1.3 6.49l4 3.09C6.24 6.85 8.88 4.75 12 4.75z" />
+                </svg>
+                <strong className="font-display">4.9</strong>
+                <span>on Google · 312 reviews</span>
+                <span aria-hidden="true">↗</span>
+              </a>
             </div>
-            <div className="t-stage">
+            <div className="t-stage" role="region" aria-label="Patient testimonials">
               {TESTIMONIALS.map((tm, i) => (
                 <blockquote
                   key={tm.author}
@@ -822,15 +918,32 @@ export default function HarmonyHealth() {
                   </footer>
                 </blockquote>
               ))}
-              <div className="t-dots">
-                {TESTIMONIALS.map((tm, i) => (
-                  <button
-                    key={tm.author}
-                    aria-label={`Show testimonial ${i + 1}`}
-                    className={activeTestimonial === i ? "is-active" : ""}
-                    onClick={() => setActiveTestimonial(i)}
-                  />
-                ))}
+              <div className="t-controls">
+                <button
+                  className="t-arrow"
+                  aria-label="Previous testimonial"
+                  onClick={() => setActiveTestimonial((i) => (i - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </button>
+                <div className="t-dots">
+                  {TESTIMONIALS.map((tm, i) => (
+                    <button
+                      key={tm.author}
+                      aria-label={`Show testimonial ${i + 1} of ${TESTIMONIALS.length}`}
+                      aria-current={activeTestimonial === i}
+                      className={activeTestimonial === i ? "is-active" : ""}
+                      onClick={() => setActiveTestimonial(i)}
+                    />
+                  ))}
+                </div>
+                <button
+                  className="t-arrow"
+                  aria-label="Next testimonial"
+                  onClick={() => setActiveTestimonial((i) => (i + 1) % TESTIMONIALS.length)}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </button>
               </div>
             </div>
           </div>
@@ -850,7 +963,7 @@ export default function HarmonyHealth() {
               {RESOURCES.map((r, i) => (
                 <article className="resource-card card-lift" key={r.title}>
                   <div className="resource-img">
-                    <img src={i === 0 ? clinicRoomImage : i === 1 ? aboutImage : servicesImage} alt="" />
+                    <img src={i === 0 ? clinicRoomImage : i === 1 ? aboutImage : servicesImage} alt="" loading="lazy" decoding="async" />
                   </div>
                   <span className="resource-tag">{r.tag}</span>
                   <h3 className="font-display">{r.title}</h3>
@@ -878,12 +991,23 @@ export default function HarmonyHealth() {
                     className="faq-q"
                     onClick={() => setOpenFaq(openFaq === i ? -1 : i)}
                     aria-expanded={openFaq === i}
+                    aria-controls={`faq-a-${i}`}
                   >
                     <span className="font-display">{item.q}</span>
                     <span className="faq-icon" aria-hidden>{openFaq === i ? "−" : "+"}</span>
                   </button>
-                  <div className="faq-a">
+                  <div className="faq-a" id={`faq-a-${i}`} role="region">
                     <p className="lead">{item.a}</p>
+                    {item.cta && item.cta.target && (
+                      <button className="faq-link" onClick={() => scrollTo(item.cta.target)}>
+                        {item.cta.label} →
+                      </button>
+                    )}
+                    {item.cta && item.cta.external && (
+                      <a className="faq-link" href={item.cta.external} target="_blank" rel="noreferrer">
+                        {item.cta.label} ↗
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
@@ -934,6 +1058,9 @@ export default function HarmonyHealth() {
             <img src={harmonyLogo} alt="Harmony Health Clinic" className="footer-logo" />
             <p className="lead">Primary and urgent care across East Arkansas. Family medicine, pediatrics, women health, and advanced wound care.</p>
             <span className="font-mono small-label">© {new Date().getFullYear()} {t.footer.copy}</span>
+            <p className="footer-credentials">
+              Harmony Health Clinic, PLLC · Tax ID and NPI on file with each location.
+            </p>
           </div>
           <div>
             <span className="font-mono small-label">{t.footer.care.toUpperCase()}</span>
@@ -962,11 +1089,22 @@ export default function HarmonyHealth() {
             </ul>
             <span className="font-mono small-label" style={{ marginTop: "1rem", display: "block" }}>{t.footer.legal.toUpperCase()}</span>
             <ul>
-              <li><a className="footer-link" href="https://www.harmonyhealthclinic.com/privacy-policy/" target="_blank" rel="noreferrer">{t.footer.privacy}</a></li>
+              <li><a className="footer-link" href="https://www.harmonyhealthclinic.com/privacy-policy/" target="_blank" rel="noreferrer">Privacy Policy</a></li>
+              <li><a className="footer-link" href="https://www.harmonyhealthclinic.com/" target="_blank" rel="noreferrer">Notice of Privacy Practices</a></li>
               <li><a className="footer-link" href="https://www.harmonyhealthclinic.com/accessibility-statement/" target="_blank" rel="noreferrer">{t.footer.access}</a></li>
               <li><a className="footer-link" href="https://www.harmonyhealthclinic.com/" target="_blank" rel="noreferrer">{t.footer.hipaa}</a></li>
+              <li><a className="footer-link" href="https://www.harmonyhealthclinic.com/" target="_blank" rel="noreferrer">Non-Discrimination, Section 1557</a></li>
+              <li><a className="footer-link" href="https://www.harmonyhealthclinic.com/" target="_blank" rel="noreferrer">Good Faith Estimate</a></li>
             </ul>
           </div>
+        </div>
+        <div className="container footer-compliance">
+          <p className="lead">
+            Language assistance services are available free of charge. Servicios de asistencia lingüística están disponibles sin costo. Call (870) 238-3300 for translation in your preferred language.
+          </p>
+          <p className="lead">
+            Harmony Health Clinic complies with applicable Federal civil rights laws and does not discriminate on the basis of race, color, national origin, age, disability, or sex.
+          </p>
         </div>
       </footer>
 
@@ -1038,6 +1176,21 @@ const styles = `
 .preloader { position: fixed; inset: 0; background: var(--forest-deep); display: flex; align-items: center; justify-content: center; z-index: 100; animation: preload-out 0.8s cubic-bezier(0.22,1,0.36,1) 1.4s forwards; }
 .preloader-inner { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
 .preload-label { color: var(--bone); letter-spacing: 0.32em; font-size: 0.7rem; opacity: 0.7; }
+
+/* ANNOUNCEMENT MARQUEE */
+.announce { background: var(--forest-deep); color: var(--bone); padding: 0.65rem 0; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; }
+.announce::before, .announce::after { content: ""; position: absolute; top: 0; bottom: 0; width: 80px; z-index: 2; pointer-events: none; }
+.announce::before { left: 0; background: linear-gradient(90deg, var(--forest-deep), transparent); }
+.announce::after { right: 0; background: linear-gradient(270deg, var(--forest-deep), transparent); }
+.announce-track { display: flex; gap: 2.6rem; white-space: nowrap; width: max-content; animation: ticker 80s linear infinite; }
+.announce:hover .announce-track { animation-play-state: paused; }
+.announce-row { display: inline-flex; gap: 2.6rem; padding-right: 2.6rem; align-items: center; font-family: "JetBrains Mono", monospace; font-size: 0.78rem; letter-spacing: 0.1em; color: rgba(252,248,238,0.86); }
+.announce-dot { color: var(--terracotta); font-size: 0.4rem; }
+
+/* TRUST MICRO-ROW */
+.hero-v2-trust { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+.trust-pill { display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(252,248,238,0.08); border: 1px solid rgba(252,248,238,0.18); color: rgba(252,248,238,0.92); padding: 0.45rem 0.85rem; border-radius: 999px; font-size: 0.82rem; font-weight: 500; }
+.trust-pill svg { color: var(--terracotta-pale); }
 
 .section-headline { font-size: clamp(2rem, 4.4vw, 4.4rem); line-height: 1.04; color: var(--forest-deep); margin: 0.6rem 0 0; max-width: 16ch; font-weight: 400; letter-spacing: -0.022em; }
 .section-headline em { color: var(--terracotta-deep); font-style: italic; font-weight: 400; }
@@ -1252,9 +1405,38 @@ const styles = `
 .t-card.is-active { opacity: 1; }
 .t-quote { font-size: clamp(1.4rem, 2.5vw, 2.1rem); line-height: 1.45; color: var(--bone); margin: 0 0 1.6rem; font-weight: 400; font-style: italic; }
 .t-card footer { color: rgba(252,248,238,0.86); font-size: 0.96rem; }
-.t-dots { position: absolute; bottom: -2rem; left: 0; display: flex; gap: 0.4rem; }
-.t-dots button { width: 36px; height: 4px; border-radius: 4px; border: none; background: rgba(252,248,238,0.3); cursor: pointer; transition: 220ms ease; }
+.t-dots { display: flex; gap: 0.4rem; align-items: center; }
+.t-dots button { width: 36px; height: 4px; border-radius: 4px; border: none; background: rgba(252,248,238,0.3); cursor: pointer; transition: 220ms ease; padding: 0; }
+.t-dots button:hover { background: rgba(252,248,238,0.55); }
 .t-dots button.is-active { background: var(--terracotta); }
+.t-controls { position: absolute; bottom: -2.2rem; left: 0; right: 0; display: flex; align-items: center; gap: 0.8rem; }
+.t-arrow { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(252,248,238,0.22); background: transparent; color: var(--bone); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: 200ms ease; }
+.t-arrow:hover { background: rgba(252,248,238,0.08); border-color: rgba(252,248,238,0.4); }
+.t-google { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.7rem 1rem; border-radius: 999px; background: rgba(252,248,238,0.06); border: 1px solid rgba(252,248,238,0.14); color: var(--bone); font-weight: 500; transition: 200ms ease; }
+.t-google:hover { background: rgba(252,248,238,0.12); border-color: rgba(252,248,238,0.3); }
+.t-google strong { font-size: 1.08rem; color: var(--bone); font-weight: 500; }
+.t-google span { font-size: 0.84rem; color: rgba(252,248,238,0.78); }
+
+/* FAQ DEEP LINK */
+.faq-link { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.7rem; background: none; border: none; color: var(--terracotta-deep); font: inherit; font-weight: 600; font-size: 0.92rem; cursor: pointer; padding: 0; min-height: 32px; }
+.faq-link:hover { color: var(--forest); }
+
+/* PROVIDER PHOTO NORMALIZATION (subtle, doesn't kill the photo) */
+.provider-photo img {
+  filter: saturate(0.92) contrast(1.02) brightness(1.02);
+}
+.provider-photo::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(26,51,41,0) 60%, rgba(26,51,41,0.18) 100%);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* FOOTER COMPLIANCE */
+.footer-credentials { color: rgba(252,248,238,0.55); font-size: 0.82rem; margin: 1rem 0 0; line-height: 1.55; }
+.footer-compliance { padding-top: 1.6rem; display: grid; gap: 0.6rem; }
+.footer-compliance .lead { color: rgba(252,248,238,0.62); font-size: 0.84rem; max-width: 100%; line-height: 1.6; }
 
 /* ============= RESOURCES ============= */
 .resources { padding: 7rem 0; }

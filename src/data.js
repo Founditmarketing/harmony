@@ -127,8 +127,9 @@ export const PROVIDERS = [
     name: "Dr. Hong-Van Nguyen, MD",
     role: "Pediatrics",
     specialty: "Pediatric Care",
-    tags: ["wynne", "pediatrics"],
+    tags: ["wynne", "pediatrics", "spanish"],
     accepting: true,
+    languages: ["English", "Vietnamese", "Spanish"],
     img: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=800&q=80&auto=format&fit=crop",
     bio: "From New Orleans. Medical degree from LSU New Orleans, pediatric residency at UAMS Little Rock with training at Arkansas Children Hospital. Believes in calm child-friendly visits.",
     education: ["LSU New Orleans, Doctor of Medicine", "UAMS Pediatric Residency"],
@@ -137,8 +138,9 @@ export const PROVIDERS = [
     name: "Erica Dewey, MD",
     role: "Family Medicine",
     specialty: "Women Health, Pediatrics, Preventative Care",
-    tags: ["lonoke", "primary", "womens", "pediatrics"],
+    tags: ["lonoke", "primary", "womens", "pediatrics", "spanish"],
     accepting: true,
+    languages: ["English", "Spanish"],
     img: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=800&q=80&auto=format&fit=crop",
     bio: "Born and raised in Arkansas. UAMS medical school. Chief resident at Baptist Health-UAMS in North Little Rock. Passionate about women health, pediatrics, and chronic disease management.",
     education: ["UAMS, Doctor of Medicine", "Baptist Health-UAMS Residency, Chief Resident"],
@@ -261,12 +263,36 @@ export const TESTIMONIALS = [
 ];
 
 export const FAQ = [
-  { q: "Are you accepting new patients?", a: "Yes. Most providers across all four locations are accepting new patients. Filter the team grid by your preferred location to see who is currently available." },
-  { q: "What insurance do you accept?", a: "Harmony Health accepts most major insurance plans including BlueCross BlueShield, Aetna, UHC, Cigna, Humana, Medicare, Medicaid, and ARKids First. Use the insurance checker above to verify your plan." },
-  { q: "Do you offer same-day appointments?", a: "Yes. Same-day urgent care visits are available at Wynne and most other locations during business hours. Call ahead so we can prepare your visit and give you an accurate wait time." },
-  { q: "What is the difference between urgent care and the ER?", a: "Urgent care handles non-life-threatening illness and minor injuries quickly and at lower cost than the ER. For chest pain, stroke symptoms, severe bleeding, or trauma, call 911 or go to the nearest ER." },
-  { q: "Can I get my labs done in-office?", a: "Yes. Harmony Health Clinic offers in-house diagnostics and lab services to streamline your visit and reduce time to results." },
-  { q: "How do I access my records?", a: "Use the MyChart Patient Portal to view records, request refills, and message your care team. You will see the Patient Portal link in the navigation." },
+  {
+    q: "Are you accepting new patients?",
+    a: "Yes. Most providers across all four locations are accepting new patients. Filter the team grid by your preferred location to see who is currently available.",
+    cta: { label: "See providers accepting patients", target: "team" },
+  },
+  {
+    q: "What insurance do you accept?",
+    a: "Harmony Health accepts most major insurance plans including BlueCross BlueShield, Aetna, UHC, Cigna, Humana, Medicare, Medicaid, and ARKids First. Use the insurance checker above to verify your plan.",
+    cta: { label: "Verify your insurance plan", target: "insurance" },
+  },
+  {
+    q: "Do you offer same-day appointments?",
+    a: "Yes. Same-day urgent care visits are available at Wynne and most other locations during business hours. Call ahead so we can prepare your visit and give you an accurate wait time.",
+    cta: { label: "Reserve an urgent care slot", target: "book" },
+  },
+  {
+    q: "What is the difference between urgent care and the ER?",
+    a: "Urgent care handles non-life-threatening illness and minor injuries quickly and at lower cost than the ER. For chest pain, stroke symptoms, severe bleeding, or trauma, call 911 or go to the nearest ER.",
+    cta: { label: "See full urgent vs ER guide", target: "urgent-er" },
+  },
+  {
+    q: "Can I get my labs done in-office?",
+    a: "Yes. Harmony Health Clinic offers in-house diagnostics and lab services to streamline your visit and reduce time to results.",
+    cta: { label: "Explore our services", target: "services" },
+  },
+  {
+    q: "How do I access my records?",
+    a: "Use the MyChart Patient Portal to view records, request refills, and message your care team.",
+    cta: { label: "Open MyChart Patient Portal", external: "https://epicconnect.org/ccprd/CommunityConnect/mychartcc.html" },
+  },
 ];
 
 export const RESOURCES = [
