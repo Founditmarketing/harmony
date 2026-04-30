@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import heroVideo4k from "../assets/videos/hero-4k.mp4";
 import heroVideoPoster from "../assets/images/hero-video-poster.jpg";
+import heroMobileBg from "../assets/images/hero-mobile.png";
 import deltaCypress from "../assets/images/delta-cypress.jpg";
 import providerCinematic from "../assets/images/provider-cinematic.jpg";
 import clinicCinematic from "../assets/images/clinic-cinematic.jpg";
@@ -474,7 +475,7 @@ export default function HarmonyHealth() {
               />
             ) : (
               <img
-                src={heroVideoPoster}
+                src={heroMobileStill ? heroMobileBg : heroVideoPoster}
                 alt=""
                 aria-hidden="true"
                 decoding="async"
@@ -1305,12 +1306,12 @@ const styles = `
   transform: scale(1.52);
   transform-origin: center center;
 }
-/* Mobile / narrow: editorial still — no heavy zoom, anchor upper-third so faces/architecture read */
+/* Mobile hero photo — landscape asset; anchor left so clinician / focal subject stays in frame */
 .hero-v2-still--mobile {
-  object-position: center 28%;
+  object-position: 22% 42%;
   transform: scale(1.06);
-  transform-origin: center 28%;
-  filter: saturate(1.08) contrast(1.05) brightness(0.9);
+  transform-origin: 22% 42%;
+  filter: saturate(1.06) contrast(1.04) brightness(0.92);
 }
 @media (prefers-reduced-motion: no-preference) {
   .hero-v2-still--mobile {
