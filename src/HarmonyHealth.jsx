@@ -1306,24 +1306,12 @@ const styles = `
   transform: scale(1.52);
   transform-origin: center center;
 }
-/* Mobile hero photo — landscape asset; anchor left so clinician / focal subject stays in frame */
+/* Mobile hero photo — panoramic; anchor right; static crop (no Ken Burns drift) */
 .hero-v2-still--mobile {
-  object-position: 22% 42%;
-  transform: scale(1.06);
-  transform-origin: 22% 42%;
+  object-position: 76% 44%;
+  transform: scale(1.04);
+  transform-origin: 76% 44%;
   filter: saturate(1.06) contrast(1.04) brightness(0.92);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .hero-v2-still--mobile {
-    animation: hero-mobile-kb 22s ease-in-out infinite alternate;
-  }
-}
-@keyframes hero-mobile-kb {
-  from { transform: scale(1.04); }
-  to { transform: scale(1.1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-v2-still--mobile { animation: none !important; transform: scale(1.06); }
 }
 .hero-v2-video {
   will-change: transform, opacity;
