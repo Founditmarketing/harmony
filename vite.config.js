@@ -7,5 +7,14 @@ export default defineConfig({
   build: {
     outDir: "dist",
     assetsInlineLimit: 0,
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          maplibre: ["maplibre-gl"],
+          react: ["react", "react-dom"],
+        },
+      },
+    },
   },
 });
