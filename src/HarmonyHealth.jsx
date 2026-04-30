@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import heroVideo4k from "../assets/videos/hero-4k.mp4";
-import heroVideo1 from "../assets/videos/hero-1.mp4";
-import heroVideo2 from "../assets/videos/hero-2.mp4";
 import heroCinematic from "../assets/images/care-warm.jpg";
 import deltaCypress from "../assets/images/delta-cypress.jpg";
 import providerCinematic from "../assets/images/provider-cinematic.jpg";
@@ -19,6 +17,13 @@ import { useLocale, useReducedMotion } from "./i18n.js";
 import LocationsMap from "./components/LocationsMap.jsx";
 import BookingModal from "./components/BookingModal.jsx";
 import InsuranceChecker from "./components/InsuranceChecker.jsx";
+
+/** Dark frame so loop / seek never flashes the unrelated marketing still */
+const HERO_VIDEO_POSTER =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080"><rect width="100%" height="100%" fill="#0c1812"/></svg>',
+  );
 
 function useCountUp(target, duration = 1800, trigger = true, reduced = false) {
   const [val, setVal] = useState(reduced ? target : 0);
@@ -221,11 +226,7 @@ export default function HarmonyHealth() {
   const [zip, setZip] = useState("");
   const [zipDriveTime, setZipDriveTime] = useState(null);
   const [waitSeed, setWaitSeed] = useState(0);
-  const [videoIdx, setVideoIdx] = useState(0);
   const statsRef = useRef(null);
-  const heroVideoRef = useRef(null);
-  /* Primary clip is native 16:9 UHD — sharper when scaled down; extras rotate after */
-  const heroVideos = [heroVideo4k, heroVideo1, heroVideo2];
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), reduced ? 250 : 1500);
@@ -435,16 +436,14 @@ export default function HarmonyHealth() {
           <div className="hero-v2-bg">
             {!reduced ? (
               <video
-                ref={heroVideoRef}
-                key={heroVideos[videoIdx]}
                 className="hero-v2-video"
-                src={heroVideos[videoIdx]}
+                src={heroVideo4k}
                 autoPlay
                 muted
                 playsInline
+                loop
                 preload="auto"
-                poster={heroCinematic}
-                onEnded={() => setVideoIdx((i) => (i + 1) % heroVideos.length)}
+                poster={HERO_VIDEO_POSTER}
                 aria-label="Harmony Health Clinic atmospheric footage"
               />
             ) : (
@@ -1240,7 +1239,10 @@ const styles = `
   transform: scale(1.52);
   transform-origin: center center;
 }
-.hero-v2-video { will-change: transform; }
+.hero-v2-video {
+  will-change: transform;
+  background: var(--forest-deep);
+}
 .hero-v2-veil {
   position: absolute; inset: 0;
   background:
