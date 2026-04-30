@@ -1559,8 +1559,8 @@ const styles = `
 
 /* ============= LOCATIONS ============= */
 .locations { padding: 4.4rem 0; background: var(--ivory-deep); }
-.locations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
-.locations-side { display: flex; flex-direction: column; gap: 1.4rem; }
+.locations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; min-width: 0; }
+.locations-side { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
 .loc-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
 .loc-tab { background: rgba(255,255,255,0.42); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); border: 1px solid rgba(255,255,255,0.55); border-radius: 18px; padding: 1rem 1.1rem; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 0.5rem; transition: 200ms ease; min-height: 44px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55); }
 .loc-tab span:first-of-type { font-size: 1.15rem; color: var(--forest-deep); }
@@ -1582,7 +1582,7 @@ const styles = `
 .zip-result { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
 .zip-result strong { color: var(--forest); font-size: 1.1rem; }
 .zip-result.error { color: var(--terracotta-deep); }
-.locations-map-wrap { display: flex; flex-direction: column; gap: 0.8rem; }
+.locations-map-wrap { display: flex; flex-direction: column; gap: 0.8rem; min-width: 0; width: 100%; max-width: 100%; }
 .locations-meta { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0 0.4rem; color: var(--ink-mute); }
 .locations-meta strong { color: var(--forest); font-size: 1rem; font-weight: 400; }
 
@@ -1787,6 +1787,9 @@ const styles = `
 /* ============= RESPONSIVE ============= */
 @media (max-width: 1080px) {
   .hero-v2-grid, .urgent-grid, .wound-grid, .locations-grid, .testimonials-grid, .faq-grid, .founder-grid, .careers-grid { grid-template-columns: 1fr; }
+  .locations-grid { min-width: 0; }
+  .locations-map-wrap { order: -1; width: 100%; max-width: 100%; min-width: 0; }
+  .locations-side { min-width: 0; }
   .section-head, .stats-art-head { grid-template-columns: 1fr; }
   .services-grid, .team-grid, .footer-grid, .resources-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .intent-grid { grid-template-columns: 1fr; }
@@ -1956,12 +1959,77 @@ const styles = `
     min-width: 78%;
   }
 
-  /* LOCATIONS */
-  .locations { padding: 4.5rem 0; }
-  .locations-grid { grid-template-columns: 1fr; gap: 1.6rem; }
-  .loc-tabs { grid-template-columns: 1fr; }
-  .loc-detail-actions .btn { flex: 1; min-width: 0; }
-  .locations-map { height: 360px; }
+  /* LOCATIONS — responsive map height + map-first layout + clinic picker strip */
+  .locations {
+    padding: 3.25rem 0 4rem;
+    overflow-x: clip;
+  }
+  .locations-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  .locations-map-wrap {
+    order: -1;
+    width: 100%;
+    max-width: 100%;
+  }
+  .locations-side {
+    gap: 1rem;
+    min-width: 0;
+  }
+  .loc-tabs {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 0.55rem;
+    margin: 0 -1.2rem;
+    padding: 0 1.2rem 0.65rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    grid-template-columns: unset;
+  }
+  .loc-tabs::-webkit-scrollbar { display: none; }
+  .loc-tab {
+    flex: 0 0 auto;
+    min-width: min(172px, 44vw);
+    max-width: 220px;
+    scroll-snap-align: start;
+    padding: 0.85rem 1rem;
+  }
+  .loc-detail {
+    padding: 1.15rem 1.2rem;
+    border-radius: 20px;
+  }
+  .loc-detail .lead { font-size: 0.98rem; }
+  .loc-detail-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .loc-detail-actions .btn {
+    flex: none;
+    width: 100%;
+    min-height: 52px;
+    justify-content: center;
+  }
+  .zip-form { padding: 1rem 1.05rem; }
+  .zip-input {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+  .zip-input input { width: 100%; min-width: 0; }
+  .zip-input .btn { width: 100%; min-height: 52px; }
+  .locations-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0 0.2rem;
+    max-width: 100%;
+  }
+  .locations-meta strong { font-size: 0.95rem; line-height: 1.35; max-width: 100%; }
 
   /* RECOGNITIONS */
   .recognitions { padding: 4rem 0; }
