@@ -348,12 +348,15 @@ export default function HarmonyHealth() {
       {loading && (
         <div className="preloader" aria-hidden="true">
           <div className="preloader-inner">
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-              <circle cx="40" cy="40" r="32" stroke="var(--bone)" strokeWidth="1" opacity="0.3" />
-              <circle cx="40" cy="40" r="32" stroke="var(--terracotta)" strokeWidth="2" pathLength="201" strokeDasharray="201" style={{ animation: "draw-stroke 1.4s cubic-bezier(0.22,1,0.36,1) forwards" }} />
-              <path d="M28 32 L28 48 M28 40 L40 40 M40 32 L40 48 M48 32 L48 48 M48 32 L52 36 M48 40 L52 40 M48 48 L52 44" stroke="var(--bone)" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            <span className="font-mono preload-label">HARMONY HEALTH CLINIC</span>
+            <div className="preload-logo-card">
+              <img
+                src={harmonyLogo}
+                alt=""
+                className="preload-logo"
+                decoding="sync"
+                fetchPriority="high"
+              />
+            </div>
           </div>
         </div>
       )}
@@ -1206,8 +1209,32 @@ const styles = `
 .hh-app { position: relative; }
 
 .preloader { position: fixed; inset: 0; background: var(--forest-deep); display: flex; align-items: center; justify-content: center; z-index: 100; animation: preload-out 0.8s cubic-bezier(0.22,1,0.36,1) 1.4s forwards; }
-.preloader-inner { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
-.preload-label { color: var(--bone); letter-spacing: 0.32em; font-size: 0.7rem; opacity: 0.7; }
+.preloader-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; min-height: 120px; }
+.preload-logo-card {
+  padding: 1.35rem 2rem;
+  border-radius: 26px;
+  background: rgba(248,251,254,0.97);
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    0 28px 56px rgba(4,20,42,0.45),
+    0 0 0 1px rgba(56,189,248,0.12);
+  opacity: 0;
+  animation: preload-logo-in 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+}
+.preload-logo {
+  width: min(220px, 56vw);
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+@keyframes preload-logo-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .preload-logo-card { animation: none; opacity: 1; transform: none; }
+}
 
 /* ANNOUNCEMENT MARQUEE */
 .announce { background: var(--forest-deep); color: var(--bone); padding: 0.65rem 0; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; }
