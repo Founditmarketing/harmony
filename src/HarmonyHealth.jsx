@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import heroVideo4k from "../assets/videos/hero-4k.mp4";
-import heroCinematic from "../assets/images/care-warm.jpg";
+import heroVideoPoster from "../assets/images/hero-video-poster.jpg";
 import deltaCypress from "../assets/images/delta-cypress.jpg";
 import providerCinematic from "../assets/images/provider-cinematic.jpg";
 import clinicCinematic from "../assets/images/clinic-cinematic.jpg";
@@ -17,13 +17,6 @@ import { useLocale, useReducedMotion } from "./i18n.js";
 import LocationsMap from "./components/LocationsMap.jsx";
 import BookingModal from "./components/BookingModal.jsx";
 import InsuranceChecker from "./components/InsuranceChecker.jsx";
-
-/** Dark frame so loop / seek never flashes the unrelated marketing still */
-const HERO_VIDEO_POSTER =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080"><rect width="100%" height="100%" fill="#0c1812"/></svg>',
-  );
 
 function useCountUp(target, duration = 1800, trigger = true, reduced = false) {
   const [val, setVal] = useState(reduced ? target : 0);
@@ -227,10 +220,27 @@ export default function HarmonyHealth() {
   const [zipDriveTime, setZipDriveTime] = useState(null);
   const [waitSeed, setWaitSeed] = useState(0);
   const statsRef = useRef(null);
+  const heroVideoRef = useRef(null);
+  const [heroVideoVisible, setHeroVideoVisible] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), reduced ? 250 : 1500);
     return () => clearTimeout(t);
+  }, [reduced]);
+
+  useEffect(() => {
+    if (reduced) return;
+    const el = heroVideoRef.current;
+    if (!el) return;
+    const show = () => setHeroVideoVisible(true);
+    el.addEventListener("playing", show);
+    el.addEventListener("loadeddata", show);
+    const maxWait = window.setTimeout(show, 6000);
+    return () => {
+      window.clearTimeout(maxWait);
+      el.removeEventListener("playing", show);
+      el.removeEventListener("loadeddata", show);
+    };
   }, [reduced]);
 
   useEffect(() => {
@@ -436,18 +446,25 @@ export default function HarmonyHealth() {
           <div className="hero-v2-bg">
             {!reduced ? (
               <video
-                className="hero-v2-video"
+                ref={heroVideoRef}
+                className={`hero-v2-video${heroVideoVisible ? " hero-v2-video--visible" : ""}`}
                 src={heroVideo4k}
                 autoPlay
                 muted
                 playsInline
                 loop
                 preload="auto"
-                poster={HERO_VIDEO_POSTER}
+                poster={heroVideoPoster}
                 aria-label="Harmony Health Clinic atmospheric footage"
               />
             ) : (
-              <img src={heroCinematic} alt="" aria-hidden="true" />
+              <img
+                src={heroVideoPoster}
+                alt=""
+                aria-hidden="true"
+                decoding="async"
+                fetchPriority="high"
+              />
             )}
             <div className="hero-v2-veil" />
             <div className="hero-v2-vignette" />
@@ -1240,8 +1257,18 @@ const styles = `
   transform-origin: center center;
 }
 .hero-v2-video {
-  will-change: transform;
+  will-change: transform, opacity;
   background: var(--forest-deep);
+  opacity: 0;
+  transition: opacity 0.55s ease-out;
+}
+.hero-v2-video.hero-v2-video--visible {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-v2-video.hero-v2-video--visible {
+    transition: opacity 0.2s ease-out;
+  }
 }
 .hero-v2-veil {
   position: absolute; inset: 0;
