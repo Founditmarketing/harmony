@@ -88,18 +88,18 @@ export default function InsuranceChecker({ t, plans }) {
       </div>
 
       <style>{`
-        .insurance { padding: 4rem 0; background: var(--sand-soft); border-block: 1px solid var(--line); }
+        .insurance { padding: 4rem 0; background: linear-gradient(165deg, rgba(224,242,254,0.65), var(--sand-soft)); border-block: 1px solid var(--line); }
         .insurance-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 3rem; align-items: center; }
         .insurance h2 { font-size: clamp(1.7rem, 2.8vw, 2.4rem); margin: 0.6rem 0 0.6rem; color: var(--forest-deep); }
-        .insurance-card { background: var(--ivory); border: 1px solid var(--line); border-radius: 24px; padding: 1.4rem; box-shadow: var(--shadow-soft); position: relative; }
-        .insurance-input { display: flex; align-items: center; gap: 0.65rem; background: var(--ivory-deep); border: 1px solid var(--line); border-radius: 16px; padding: 0.85rem 1rem; color: var(--ink-mute); }
+        .insurance-card { background: rgba(255,255,255,0.52); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); border: 1px solid rgba(255,255,255,0.58); border-radius: 24px; padding: 1.4rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), var(--glass-shadow); position: relative; }
+        .insurance-input { display: flex; align-items: center; gap: 0.65rem; background: rgba(255,255,255,0.42); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.55); border-radius: 16px; padding: 0.85rem 1rem; color: var(--ink-mute); }
         .insurance-input:focus-within { border-color: var(--forest); box-shadow: var(--focus); }
         .insurance-input input { flex: 1; border: none; background: transparent; font: inherit; outline: none; color: var(--ink); min-height: 32px; }
         .ins-clear { background: none; border: none; cursor: pointer; color: var(--ink-mute); font-size: 1.3rem; line-height: 1; }
         .insurance-list { list-style: none; padding: 0; margin: 0.6rem 0 0; display: grid; gap: 0.3rem; }
-        .insurance-suggestion { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.7rem 0.95rem; border-radius: 12px; border: 1px solid var(--line); background: var(--ivory-deep); cursor: pointer; text-align: left; font: inherit; }
+        .insurance-suggestion { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.7rem 0.95rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.38); backdrop-filter: blur(10px); cursor: pointer; text-align: left; font: inherit; }
         .insurance-suggestion:hover { border-color: var(--forest); }
-        .insurance-result { margin-top: 0.8rem; padding: 1rem 1.1rem; background: var(--ivory-deep); border: 1px solid var(--line); border-radius: 16px; display: grid; gap: 0.6rem; }
+        .insurance-result { margin-top: 0.8rem; padding: 1rem 1.1rem; background: rgba(255,255,255,0.45); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.55); border-radius: 16px; display: grid; gap: 0.6rem; }
         .insurance-result strong { font-size: 1.1rem; color: var(--forest-deep); }
         @media (max-width: 880px) { .insurance-grid { grid-template-columns: 1fr; gap: 1.4rem; } }
       `}</style>

@@ -218,7 +218,7 @@ export default function BookingModal({ open, onClose, t, locations, providers, d
       </div>
 
       <style>{`
-        .booking-card { background: var(--bone, #fcf8ee); border-radius: 28px; max-width: 640px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 2rem; position: relative; box-shadow: var(--shadow-strong); animation: scale-in 320ms cubic-bezier(0.22,1,0.36,1) both; }
+        .booking-card { background: rgba(255,255,255,0.72); backdrop-filter: blur(26px) saturate(165%); -webkit-backdrop-filter: blur(26px) saturate(165%); border: 1px solid rgba(255,255,255,0.62); border-radius: 28px; max-width: 640px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 2rem; position: relative; box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), var(--shadow-strong); animation: scale-in 320ms cubic-bezier(0.22,1,0.36,1) both; }
         .booking-head { margin-bottom: 1.4rem; }
         .booking-head .small-label { color: var(--ink-mute); }
         .booking-steps { display: flex; gap: 0.4rem; margin-top: 0.7rem; }
@@ -226,7 +226,7 @@ export default function BookingModal({ open, onClose, t, locations, providers, d
         .booking-step.active { background: var(--forest); color: var(--ivory); border-color: var(--forest); }
         .booking-step.done { background: var(--sand); color: var(--forest); border-color: var(--sand); }
         .booking-step-num { display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 999px; background: rgba(255,255,255,0.18); font-weight: 700; font-size: 0.74rem; }
-        .booking-step.done .booking-step-num, .booking-step:not(.active) .booking-step-num { background: rgba(31,58,46,0.12); }
+        .booking-step.done .booking-step-num, .booking-step:not(.active) .booking-step-num { background: rgba(21,101,184,0.14); }
         .booking-step-body h3 { font-size: 1.4rem; margin: 0 0 1rem; color: var(--forest-deep); }
         .booking-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
         .booking-option { padding: 0.95rem 1rem; text-align: left; border-radius: 14px; border: 1px solid var(--line); background: var(--ivory-deep); cursor: pointer; transition: 220ms ease; min-height: 56px; }
@@ -257,7 +257,7 @@ export default function BookingModal({ open, onClose, t, locations, providers, d
             width: 40px;
             height: 4px;
             border-radius: 4px;
-            background: rgba(26,51,41,0.18);
+            background: rgba(21,76,130,0.16);
             margin: 0 auto 1rem;
           }
           .booking-options { grid-template-columns: 1fr; }

@@ -17,7 +17,7 @@ const RASTER_STYLE = {
     },
   },
   layers: [
-    { id: "background", type: "background", paint: { "background-color": "#f2ede3" } },
+    { id: "background", type: "background", paint: { "background-color": "#dceaf7" } },
     { id: "carto-light", type: "raster", source: "carto-light" },
   ],
 };
@@ -86,13 +86,13 @@ export default function LocationsMap({ locations, activeKey, onPick }) {
     <div className="locations-map" aria-label="Interactive map of Harmony Health Clinic locations">
       <div ref={containerRef} className="map-canvas" />
       <style>{`
-        .locations-map { position: relative; border-radius: 28px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow-soft); height: 460px; background: var(--ivory-deep); }
+        .locations-map { position: relative; border-radius: 28px; overflow: hidden; border: 1px solid rgba(255,255,255,0.55); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), var(--glass-shadow); height: 460px; background: rgba(255,255,255,0.35); backdrop-filter: blur(12px); }
         .map-canvas { width: 100%; height: 100%; }
         .maplibregl-canvas { outline: none; }
         .map-pin { background: none; border: none; padding: 0; cursor: pointer; display: inline-flex; flex-direction: column; align-items: center; gap: 0.25rem; transform: translateY(-2px); }
-        .map-pin-dot { width: 14px; height: 14px; border-radius: 999px; background: var(--terracotta); box-shadow: 0 0 0 4px rgba(201,123,90,0.18), 0 8px 18px -6px rgba(168,95,63,0.6); transition: 220ms ease; }
-        .map-pin.is-active .map-pin-dot { background: var(--terracotta-deep); box-shadow: 0 0 0 6px rgba(201,123,90,0.28), 0 0 0 12px rgba(201,123,90,0.14), 0 10px 24px -6px rgba(168,95,63,0.7); transform: scale(1.15); }
-        .map-pin-label { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.16em; padding: 0.2rem 0.55rem; border-radius: 999px; background: rgba(255,255,255,0.92); color: var(--forest); border: 1px solid var(--line); }
+        .map-pin-dot { width: 14px; height: 14px; border-radius: 999px; background: var(--terracotta-deep); box-shadow: 0 0 0 4px rgba(56,189,248,0.22), 0 8px 18px -6px rgba(14,116,188,0.55); transition: 220ms ease; }
+        .map-pin.is-active .map-pin-dot { background: var(--forest); box-shadow: 0 0 0 6px rgba(56,189,248,0.28), 0 0 0 12px rgba(56,189,248,0.12), 0 10px 24px -6px rgba(14,116,188,0.55); transform: scale(1.15); }
+        .map-pin-label { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.16em; padding: 0.2rem 0.55rem; border-radius: 999px; background: rgba(255,255,255,0.88); backdrop-filter: blur(8px); color: var(--forest-deep); border: 1px solid rgba(255,255,255,0.55); }
         .map-pin.is-active .map-pin-label { background: var(--forest); color: var(--ivory); border-color: var(--forest); }
         .maplibregl-ctrl-attrib { font-size: 0.65rem; }
       `}</style>
