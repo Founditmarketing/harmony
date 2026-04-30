@@ -83,13 +83,13 @@ function timeGreeting(d = new Date()) {
   return "Good evening";
 }
 
-function useScrollReveal(ref, threshold = 0.04) {
+function useScrollReveal(ref, threshold = 0.01) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     if (!ref.current) return;
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold, rootMargin: "0px 0px -8% 0px" },
+      { threshold, rootMargin: "0px 0px -2% 0px" },
     );
     obs.observe(ref.current);
     return () => obs.disconnect();
@@ -304,6 +304,38 @@ export default function HarmonyHealth() {
   const status = clinicStatusLine();
   const greeting = timeGreeting();
   const localTime = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const mobileCarePaths = [
+    {
+      service: SERVICES.find((s) => s.key === "urgent"),
+      eyebrow: "Need care today",
+      prompt: "Illness, minor injury, labs, x-rays, or something that cannot wait.",
+      next: "Reserve same-day care",
+    },
+    {
+      service: SERVICES.find((s) => s.key === "primary"),
+      eyebrow: "Build a care home",
+      prompt: "Annual visits, chronic conditions, prevention, and a provider who knows you.",
+      next: "Find primary care",
+    },
+    {
+      service: SERVICES.find((s) => s.key === "pediatrics"),
+      eyebrow: "Care for a child",
+      prompt: "Well visits, sick visits, shots, school forms, and calm pediatric care.",
+      next: "Book pediatrics",
+    },
+    {
+      service: SERVICES.find((s) => s.key === "wound"),
+      eyebrow: "A wound will not heal",
+      prompt: "Advanced wound protocols, follow-up, and certified specialist oversight.",
+      next: "Start wound care",
+    },
+    {
+      service: SERVICES.find((s) => s.key === "womens"),
+      eyebrow: "Women's health",
+      prompt: "Annual exams, screenings, contraception support, and ongoing care.",
+      next: "Book women's health",
+    },
+  ].filter((path) => path.service);
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);
@@ -703,6 +735,17 @@ export default function HarmonyHealth() {
 
               <div className="locations-map-wrap">
                 <LocationsMap locations={LOCATIONS} activeKey={activeLoc} onPick={setActiveLoc} />
+                <div className="loc-mobile-command" aria-label={`${currentLoc.name} clinic quick actions`}>
+                  <div>
+                    <span className="font-mono small-label">SELECTED CLINIC</span>
+                    <strong className="font-display">{currentLoc.name}</strong>
+                    <span>{currentLoc.region} · {openNow ? `${waitMins} min wait` : t.locations.closed_now}</span>
+                  </div>
+                  <div className="loc-mobile-command-actions">
+                    <a className="btn btn-primary" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentLoc.address)}`} target="_blank" rel="noreferrer">Directions</a>
+                    <a className="btn btn-ghost" href={`tel:${currentLoc.phone.replace(/[^0-9]/g, "")}`}>Call</a>
+                  </div>
+                </div>
                 <div className="locations-meta">
                   <span className="font-mono small-label">DELTA · ARKANSAS</span>
                   <strong className="font-display">{LOCATIONS.length} clinics. One care team.</strong>
@@ -809,6 +852,32 @@ export default function HarmonyHealth() {
               </div>
               <p className="lead">{t.services.lead}</p>
             </Reveal>
+            <div className="care-guide-mobile" aria-label="Find the right Harmony care">
+              <div className="care-guide-mobile-head">
+                <span className="font-mono small-label">FIND CARE</span>
+                <strong className="font-display">Choose what feels closest.</strong>
+              </div>
+              <div className="care-guide-mobile-list">
+                {mobileCarePaths.map((path, i) => (
+                  <button
+                    key={path.service.key}
+                    className="care-guide-row"
+                    onClick={() => openBooking({ reason: path.service.key })}
+                  >
+                    <span className="care-guide-index font-display">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="care-guide-copy">
+                      <span className="font-mono small-label">{path.eyebrow}</span>
+                      <strong className="font-display">{path.service.name}</strong>
+                      <span>{path.prompt}</span>
+                    </span>
+                    <span className="care-guide-action">
+                      {path.next}
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3"><path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="services-grid">
               {SERVICES.map((s, i) => (
                 <article key={s.name} className="service-card card-lift" style={{ animationDelay: `${i * 60}ms` }}>
@@ -1637,6 +1706,7 @@ const styles = `
 .service-icon { width: 60px; height: 60px; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; }
 .service-link { margin-top: auto; display: inline-flex; align-items: center; gap: 0.4rem; background: none; border: none; color: var(--forest); font-weight: 600; font-size: 0.94rem; cursor: pointer; padding-top: 0.8rem; min-height: 44px; }
 .service-link:hover { color: var(--terracotta-deep); }
+.care-guide-mobile { display: none; }
 
 /* ============= WOUND DRENCHED ============= */
 .wound-drenched { padding: 5rem 0; background: linear-gradient(135deg, #042f55 0%, #0c6cbd 42%, #38bdf8 100%); color: var(--bone); position: relative; overflow: hidden; }
@@ -1717,6 +1787,7 @@ const styles = `
 .zip-result strong { color: var(--forest); font-size: 1.1rem; }
 .zip-result.error { color: var(--terracotta-deep); }
 .locations-map-wrap { display: flex; flex-direction: column; gap: 0.8rem; min-width: 0; width: 100%; max-width: 100%; }
+.loc-mobile-command { display: none; }
 .locations-meta { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0 0.4rem; color: var(--ink-mute); }
 .locations-meta strong { color: var(--forest); font-size: 1rem; font-weight: 400; }
 
@@ -2046,17 +2117,91 @@ const styles = `
   .urgent-promise { font-size: 1rem; margin-top: 1.6rem; }
 
   /* SERVICES — horizontal snap scroll */
-  .services-section { padding: 4.5rem 0; }
-  .services-grid {
-    display: flex; overflow-x: auto;
-    scroll-snap-type: x mandatory;
+  .services-section { padding: 3.4rem 0 4rem; }
+  .care-guide-mobile {
+    display: grid;
     gap: 0.75rem;
-    margin: 0 -1.2rem;
-    padding: 0.4rem 1.2rem 1.2rem;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    margin-top: -0.25rem;
   }
-  .services-grid::-webkit-scrollbar { display: none; }
+  .care-guide-mobile-head {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0 0.15rem;
+  }
+  .care-guide-mobile-head strong {
+    color: var(--forest-deep);
+    font-size: clamp(1.45rem, 6.4vw, 2rem);
+    font-weight: 400;
+    line-height: 1.08;
+  }
+  .care-guide-mobile-list {
+    display: grid;
+    gap: 0.58rem;
+  }
+  .care-guide-row {
+    appearance: none;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.68);
+    border-radius: 22px;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,0.7), rgba(232,244,255,0.46));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 12px 30px rgba(7,46,88,0.08);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.85rem;
+    padding: 0.95rem;
+    text-align: left;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  }
+  .care-guide-row:active {
+    transform: scale(0.985);
+    border-color: rgba(56,189,248,0.45);
+    background: rgba(248,251,254,0.78);
+  }
+  .care-guide-index {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--forest-deep);
+    color: var(--bone);
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .care-guide-copy {
+    min-width: 0;
+    display: grid;
+    gap: 0.24rem;
+  }
+  .care-guide-copy strong {
+    color: var(--forest);
+    font-size: 1.24rem;
+    font-weight: 400;
+    line-height: 1.05;
+  }
+  .care-guide-copy > span:last-child {
+    color: var(--ink-soft);
+    font-size: 0.91rem;
+    line-height: 1.45;
+  }
+  .care-guide-action {
+    grid-column: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: fit-content;
+    color: var(--terracotta-deep);
+    font-size: 0.86rem;
+    font-weight: 700;
+    padding-top: 0.12rem;
+  }
+  .services-grid {
+    display: none;
+  }
   .service-card {
     scroll-snap-align: start;
     flex: 0 0 80%;
@@ -2099,21 +2244,66 @@ const styles = `
 
   /* LOCATIONS — responsive map height + map-first layout + clinic picker strip */
   .locations {
-    padding: 3.25rem 0 4rem;
+    padding: 3.1rem 0 3.6rem;
     overflow-x: clip;
+    background:
+      radial-gradient(90% 70% at 8% 0%, rgba(186,230,253,0.62), transparent 52%),
+      linear-gradient(180deg, var(--ivory-deep), var(--ivory));
   }
   .locations-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.25rem;
+    gap: 0.95rem;
   }
   .locations-map-wrap {
     order: -1;
     width: 100%;
     max-width: 100%;
+    gap: 0.65rem;
   }
   .locations-side {
-    gap: 1rem;
+    gap: 0.82rem;
     min-width: 0;
+  }
+  .loc-mobile-command {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+    border-radius: 22px;
+    background: linear-gradient(145deg, rgba(7,23,45,0.92), rgba(10,69,119,0.88));
+    color: var(--bone);
+    border: 1px solid rgba(125,211,252,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 46px rgba(7,46,88,0.16);
+  }
+  .loc-mobile-command > div:first-child {
+    display: grid;
+    gap: 0.22rem;
+  }
+  .loc-mobile-command strong {
+    font-size: 1.55rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--bone);
+  }
+  .loc-mobile-command span:not(.small-label) {
+    color: rgba(236,246,255,0.78);
+    font-size: 0.92rem;
+  }
+  .loc-mobile-command .small-label {
+    color: rgba(186,230,253,0.74);
+  }
+  .loc-mobile-command-actions {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 0.55rem;
+  }
+  .loc-mobile-command-actions .btn {
+    min-height: 50px;
+    width: 100%;
+  }
+  .loc-mobile-command-actions .btn-ghost {
+    color: var(--bone);
+    border-color: rgba(248,251,254,0.28);
+    background: rgba(248,251,254,0.08);
   }
   .loc-tabs {
     display: flex;
@@ -2130,16 +2320,37 @@ const styles = `
   .loc-tabs::-webkit-scrollbar { display: none; }
   .loc-tab {
     flex: 0 0 auto;
-    min-width: min(172px, 44vw);
+    min-width: min(176px, 46vw);
     max-width: 220px;
     scroll-snap-align: start;
-    padding: 0.85rem 1rem;
+    padding: 0.82rem 0.95rem;
+    border-radius: 20px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), 0 10px 24px rgba(7,46,88,0.06);
+  }
+  .loc-tab span:first-of-type {
+    font-size: 1.08rem;
+    line-height: 1;
   }
   .loc-detail {
-    padding: 1.15rem 1.2rem;
-    border-radius: 20px;
+    padding: 1.05rem;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.68);
   }
+  .loc-detail-head { margin-bottom: 0.45rem; }
+  .loc-detail-head h3 { font-size: 1.38rem; }
   .loc-detail .lead { font-size: 0.98rem; }
+  .loc-services {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0.8rem -1.05rem 0;
+    padding: 0 1.05rem 0.15rem;
+    scrollbar-width: none;
+  }
+  .loc-services::-webkit-scrollbar { display: none; }
+  .loc-services .chip-static {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
   .loc-detail-actions {
     flex-direction: column;
     align-items: stretch;
@@ -2257,7 +2468,8 @@ const styles = `
   /* UNIVERSAL TAP STATE */
   .btn:active { transform: scale(0.98); }
   .chip:active, .loc-tab:active { transform: scale(0.97); }
-  .intent-card:active, .service-card:active, .resource-card:active, .provider-card:active { transform: scale(0.99); }
+  .intent-card:active, .service-card:active, .resource-card:active, .provider-card:active, .care-guide-row:active { transform: scale(0.99); }
+  .btn, .loc-tab, .care-guide-row, .intent-card { touch-action: manipulation; }
 }
 
 @media (max-width: 480px) {
