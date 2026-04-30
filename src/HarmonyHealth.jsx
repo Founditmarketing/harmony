@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import heroVideo4k from "../assets/videos/hero-4k.mp4";
 import heroVideo1 from "../assets/videos/hero-1.mp4";
 import heroVideo2 from "../assets/videos/hero-2.mp4";
 import heroCinematic from "../assets/images/care-warm.jpg";
@@ -84,13 +85,13 @@ function timeGreeting(d = new Date()) {
   return "Good evening";
 }
 
-function useScrollReveal(ref, threshold = 0.18) {
+function useScrollReveal(ref, threshold = 0.04) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     if (!ref.current) return;
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold },
+      { threshold, rootMargin: "0px 0px -8% 0px" },
     );
     obs.observe(ref.current);
     return () => obs.disconnect();
@@ -223,7 +224,8 @@ export default function HarmonyHealth() {
   const [videoIdx, setVideoIdx] = useState(0);
   const statsRef = useRef(null);
   const heroVideoRef = useRef(null);
-  const heroVideos = [heroVideo1, heroVideo2];
+  /* Primary clip is native 16:9 UHD — sharper when scaled down; extras rotate after */
+  const heroVideos = [heroVideo4k, heroVideo1, heroVideo2];
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), reduced ? 250 : 1500);
@@ -340,21 +342,24 @@ export default function HarmonyHealth() {
           </a>
           <div className="nav-links nav-links-desktop">
             <button onClick={() => scrollTo("services")}>{t.nav.services}</button>
-            <button onClick={() => scrollTo("team")}>{t.nav.team}</button>
             <button onClick={() => scrollTo("locations")}>{t.nav.locations}</button>
-            <button onClick={() => scrollTo("wound-care")}>{t.nav.wound}</button>
-            <button onClick={() => scrollTo("faq")}>{t.nav.faq}</button>
+            <button onClick={() => scrollTo("team")}>{t.nav.team}</button>
             <a href="https://epicconnect.org/ccprd/CommunityConnect/mychartcc.html" target="_blank" rel="noreferrer" className="nav-portal">
               {t.nav.portal} ↗
             </a>
-            <button
-              className="nav-lang"
-              onClick={() => setLocale(locale === "en" ? "es" : "en")}
-              aria-label={t.sr.lang_toggle}
-              title={t.sr.lang_toggle}
-            >
-              {locale === "en" ? "ES" : "EN"}
-            </button>
+            <div className="nav-lang-group" role="group" aria-label={t.sr.lang_toggle}>
+              <button
+                className={locale === "en" ? "nav-lang-active" : ""}
+                onClick={() => setLocale("en")}
+                aria-pressed={locale === "en"}
+              >EN</button>
+              <span aria-hidden="true">|</span>
+              <button
+                className={locale === "es" ? "nav-lang-active" : ""}
+                onClick={() => setLocale("es")}
+                aria-pressed={locale === "es"}
+              >ES</button>
+            </div>
             <button className="btn btn-primary nav-cta" onClick={() => openBooking({})}>
               {t.nav.book}
             </button>
@@ -425,88 +430,86 @@ export default function HarmonyHealth() {
       </div>
 
       <main id="main">
-        {/* HERO — split-screen, drenched left, full cinematic photo right */}
+        {/* HERO — full-bleed video background, editorial overlay */}
         <header id="top" className="hero-v2">
-          <div className="hero-v2-grid">
-            <div className="hero-v2-left grain">
-              <div className="hero-v2-meta">
-                <span className="font-mono">EAST ARKANSAS · DELTA · {greeting.toUpperCase()}, {localTime} CT</span>
-                <span className={`tag ${status.open ? "tag-live" : "tag-closed"}`}>
-                  Wynne, {status.label}{status.open ? ` · ${wynneWait} min wait` : ""}
-                </span>
-              </div>
+          <div className="hero-v2-bg">
+            {!reduced ? (
+              <video
+                ref={heroVideoRef}
+                key={heroVideos[videoIdx]}
+                className="hero-v2-video"
+                src={heroVideos[videoIdx]}
+                autoPlay
+                muted
+                playsInline
+                preload="auto"
+                poster={heroCinematic}
+                onEnded={() => setVideoIdx((i) => (i + 1) % heroVideos.length)}
+                aria-label="Harmony Health Clinic atmospheric footage"
+              />
+            ) : (
+              <img src={heroCinematic} alt="" aria-hidden="true" />
+            )}
+            <div className="hero-v2-veil" />
+            <div className="hero-v2-vignette" />
+          </div>
 
-              <h1 className="hero-v2-headline font-display">
-                <span className="word-rise-stage"><span className="delay-1">A</span></span>{" "}
-                <span className="word-rise-stage"><span className="delay-2">different</span></span>{" "}
-                <span className="word-rise-stage"><span className="delay-3">kind</span></span>
-                <br />
-                <span className="word-rise-stage"><span className="delay-4">of</span></span>{" "}
-                <span className="word-rise-stage"><span className="delay-5"><em>healthcare</em>,</span></span>
-                <br />
-                <span className="word-rise-stage"><span className="delay-6">built</span></span>{" "}
-                <span className="word-rise-stage"><span className="delay-7">for</span></span>{" "}
-                <span className="word-rise-stage"><span className="delay-8">the Delta.</span></span>
-              </h1>
-
-              <p className="hero-v2-lead reveal" style={{ animationDelay: "1.0s" }}>
-                {t.hero.lead}
-              </p>
-
-              <div className="hero-v2-actions reveal" style={{ animationDelay: "1.15s" }}>
-                <button className="btn btn-terracotta btn-lg" onClick={() => openBooking({})}>
-                  {t.hero.cta_primary}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                </button>
-                <button className="btn btn-text" onClick={() => openBooking({ reason: "urgent" })}>
-                  Reserve urgent care &nbsp;<span className="tag tag-live" style={{ marginLeft: 4 }}>{wynneWait} min</span>
-                </button>
-              </div>
-
-              <div className="hero-v2-trust reveal" style={{ animationDelay: "1.28s" }}>
-                <span className="trust-pill">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3Z" /><path d="m9 12 2 2 4-4" /></svg>
-                  PCMH Level 3
-                </span>
-                <span className="trust-pill">Same-day visits</span>
-                <span className="trust-pill">BCBS · Aetna · UHC</span>
-                <span className="trust-pill">Medicare · Medicaid</span>
-              </div>
-              <div className="hero-v2-foot reveal" style={{ animationDelay: "1.4s" }}>
-                <div><strong className="font-display">04</strong><span>locations</span></div>
-                <div><strong className="font-display">12+</strong><span>providers</span></div>
-                <div><strong className="font-display">9+</strong><span>years</span></div>
-              </div>
+          <div className="container hero-v2-content">
+            <div className="hero-v2-meta reveal">
+              <span className="font-mono">EAST ARKANSAS · DELTA · {greeting.toUpperCase()}, {localTime} CT</span>
+              <span className={`tag ${status.open ? "tag-live" : "tag-closed"}`}>
+                Wynne, {status.label}{status.open ? ` · ${wynneWait} min wait` : ""}
+              </span>
             </div>
 
-            <div className="hero-v2-right">
-              <figure className="hero-v2-photo mask-reveal" style={{ animationDelay: "0.4s" }}>
-                {!reduced ? (
-                  <video
-                    ref={heroVideoRef}
-                    key={heroVideos[videoIdx]}
-                    className="hero-v2-video"
-                    src={heroVideos[videoIdx]}
-                    autoPlay
-                    muted
-                    playsInline
-                    preload="auto"
-                    poster={heroCinematic}
-                    onEnded={() => setVideoIdx((i) => (i + 1) % heroVideos.length)}
-                    aria-label="Harmony Health Clinic atmospheric footage"
-                  />
-                ) : (
-                  <img src={heroCinematic} alt="A clinician sitting with a patient in calm conversation" />
-                )}
-                <figcaption className="hero-v2-figcap">
-                  <span className="font-mono">LIVE · HARMONY HEALTH</span>
-                </figcaption>
-              </figure>
-              <div className="hero-v2-card reveal" style={{ animationDelay: "1.4s" }}>
-                <span className="font-mono small-label">SAME-DAY OPENING</span>
-                <strong className="font-display">{t.hero.proof_loc}, {t.hero.proof_time}</strong>
-                <button className="hero-v2-card-btn" onClick={() => openBooking({ reason: "urgent", location: "wynne" })}>Reserve →</button>
-              </div>
+            <h1 className="hero-v2-headline font-display">
+              <span className="word-rise-stage"><span className="delay-1">A</span></span>{" "}
+              <span className="word-rise-stage"><span className="delay-2">different</span></span>{" "}
+              <span className="word-rise-stage"><span className="delay-3">kind</span></span>
+              <br />
+              <span className="word-rise-stage"><span className="delay-4">of</span></span>{" "}
+              <span className="word-rise-stage"><span className="delay-5"><em>healthcare</em>,</span></span>
+              <br />
+              <span className="word-rise-stage"><span className="delay-6">built</span></span>{" "}
+              <span className="word-rise-stage"><span className="delay-7">for</span></span>{" "}
+              <span className="word-rise-stage"><span className="delay-8">the Delta.</span></span>
+            </h1>
+
+            <p className="hero-v2-lead reveal" style={{ animationDelay: "1.0s" }}>
+              {t.hero.lead}
+            </p>
+
+            <div className="hero-v2-actions reveal" style={{ animationDelay: "1.15s" }}>
+              <button className="btn btn-terracotta btn-lg" onClick={() => openBooking({})}>
+                {t.hero.cta_primary}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+              <button className="btn btn-light" onClick={() => scrollTo("services")}>
+                {t.hero.cta_secondary}
+              </button>
+            </div>
+
+            <div className="hero-v2-trust reveal" style={{ animationDelay: "1.28s" }}>
+              <span className="trust-pill">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3Z" /><path d="m9 12 2 2 4-4" /></svg>
+                PCMH Level 3
+              </span>
+              <span className="trust-pill">Same-day visits</span>
+              <span className="trust-pill">BCBS · Aetna · UHC</span>
+              <span className="trust-pill">Medicare · Medicaid</span>
+            </div>
+
+            <div className="hero-v2-foot reveal" style={{ animationDelay: "1.4s" }}>
+              <div><strong className="font-display">04</strong><span>locations</span></div>
+              <div><strong className="font-display">12+</strong><span>providers</span></div>
+              <div><strong className="font-display">9+</strong><span>years</span></div>
+              <div><strong className="font-display">PCMH</strong><span>Level 3 certified</span></div>
+            </div>
+
+            <div className="hero-v2-card reveal" style={{ animationDelay: "1.5s" }}>
+              <span className="font-mono small-label">SAME-DAY OPENING</span>
+              <strong className="font-display">{t.hero.proof_loc}, {t.hero.proof_time}</strong>
+              <button className="hero-v2-card-btn" onClick={() => openBooking({ reason: "urgent", location: "wynne" })}>Reserve →</button>
             </div>
           </div>
         </header>
@@ -562,6 +565,95 @@ export default function HarmonyHealth() {
                 <p className="lead">{t.intent.wound.d}</p>
                 <span className="intent-cta">{t.intent.wound.cta} →</span>
               </button>
+            </div>
+          </div>
+        </section>
+
+        {/* LOCATIONS — promoted near the top: proximity is the #1 healthcare decision factor */}
+        <section id="locations" className="locations">
+          <div className="container">
+            <Reveal className="section-head">
+              <div>
+                <span className="eyebrow">{t.locations.eyebrow}</span>
+                <h2 className="font-display section-headline">{t.locations.title_a} <em>{t.locations.title_em}</em> {t.locations.title_b}</h2>
+              </div>
+              <p className="lead">{t.locations.lead}</p>
+            </Reveal>
+            <div className="locations-grid">
+              <div className="locations-side">
+                <div className="loc-tabs">
+                  {LOCATIONS.map((loc) => {
+                    const w = jitterWait(loc, waitSeed);
+                    return (
+                      <button
+                        key={loc.key}
+                        className={`loc-tab ${activeLoc === loc.key ? "is-active" : ""}`}
+                        onClick={() => setActiveLoc(loc.key)}
+                      >
+                        <span className="font-display">{loc.name}</span>
+                        <span className="loc-tab-meta">
+                          <span className={`tag ${openNow ? "tag-live" : "tag-closed"}`}>
+                            {openNow ? `${w} min` : t.locations.closed_now}
+                          </span>
+                          <span className="font-mono small-label">{loc.region}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="loc-detail">
+                  <div className="loc-detail-head">
+                    <h3 className="font-display">{currentLoc.name}</h3>
+                    <span className={`tag ${openNow ? "tag-live" : "tag-closed"}`}>{openNow ? `${waitMins} min ${t.locations.live_wait}` : t.locations.closed_now}</span>
+                  </div>
+                  <p className="lead">{currentLoc.address}</p>
+                  <p className="lead"><strong>Hours:</strong> {currentLoc.hours}</p>
+                  <p className="lead">
+                    <strong>Phone:</strong>{" "}
+                    <a className="underline-grow" href={`tel:${currentLoc.phone.replace(/[^0-9]/g, "")}`}>{currentLoc.phone}</a>
+                  </p>
+                  <div className="loc-services">
+                    {currentLoc.services.map((s) => <span key={s} className="chip-static">{s}</span>)}
+                  </div>
+                  <div className="loc-detail-actions">
+                    <a className="btn btn-primary" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentLoc.address)}`} target="_blank" rel="noreferrer">{t.locations.directions} ↗</a>
+                    <a className="btn btn-ghost" href={`tel:${currentLoc.phone.replace(/[^0-9]/g, "")}`}>{t.locations.call}</a>
+                    <button className="btn btn-terracotta" onClick={() => openBooking({ location: currentLoc.key })}>{t.nav.book}</button>
+                  </div>
+                </div>
+
+                <form className="zip-form" onSubmit={calcDrive}>
+                  <span className="font-mono small-label">{t.locations.drive_label}</span>
+                  <div className="zip-input">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="\d{5}"
+                      maxLength={5}
+                      placeholder={t.locations.drive_placeholder}
+                      value={zip}
+                      onChange={(e) => setZip(e.target.value.replace(/[^0-9]/g, "").slice(0, 5))}
+                      aria-label={t.locations.drive_placeholder}
+                    />
+                    <button className="btn btn-primary" type="submit">{t.locations.drive_button}</button>
+                  </div>
+                  {zipDriveTime !== null && zipDriveTime !== "invalid" && (
+                    <p className="zip-result"><strong className="font-display">{zipDriveTime} min</strong> from {zip} to nearest clinic, {currentLoc.name}.</p>
+                  )}
+                  {zipDriveTime === "invalid" && (
+                    <p className="zip-result error">Enter a 5-digit ZIP code.</p>
+                  )}
+                </form>
+              </div>
+
+              <div className="locations-map-wrap">
+                <LocationsMap locations={LOCATIONS} activeKey={activeLoc} onPick={setActiveLoc} />
+                <div className="locations-meta">
+                  <span className="font-mono small-label">DELTA · ARKANSAS</span>
+                  <strong className="font-display">{LOCATIONS.length} clinics. One care team.</strong>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -746,95 +838,6 @@ export default function HarmonyHealth() {
                   </div>
                 </article>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* LOCATIONS */}
-        <section id="locations" className="locations">
-          <div className="container">
-            <Reveal className="section-head">
-              <div>
-                <span className="eyebrow">{t.locations.eyebrow}</span>
-                <h2 className="font-display section-headline">{t.locations.title_a} <em>{t.locations.title_em}</em> {t.locations.title_b}</h2>
-              </div>
-              <p className="lead">{t.locations.lead}</p>
-            </Reveal>
-            <div className="locations-grid">
-              <div className="locations-side">
-                <div className="loc-tabs">
-                  {LOCATIONS.map((loc) => {
-                    const w = jitterWait(loc, waitSeed);
-                    return (
-                      <button
-                        key={loc.key}
-                        className={`loc-tab ${activeLoc === loc.key ? "is-active" : ""}`}
-                        onClick={() => setActiveLoc(loc.key)}
-                      >
-                        <span className="font-display">{loc.name}</span>
-                        <span className="loc-tab-meta">
-                          <span className={`tag ${openNow ? "tag-live" : "tag-closed"}`}>
-                            {openNow ? `${w} min` : t.locations.closed_now}
-                          </span>
-                          <span className="font-mono small-label">{loc.region}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="loc-detail">
-                  <div className="loc-detail-head">
-                    <h3 className="font-display">{currentLoc.name}</h3>
-                    <span className={`tag ${openNow ? "tag-live" : "tag-closed"}`}>{openNow ? `${waitMins} min ${t.locations.live_wait}` : t.locations.closed_now}</span>
-                  </div>
-                  <p className="lead">{currentLoc.address}</p>
-                  <p className="lead"><strong>Hours:</strong> {currentLoc.hours}</p>
-                  <p className="lead">
-                    <strong>Phone:</strong>{" "}
-                    <a className="underline-grow" href={`tel:${currentLoc.phone.replace(/[^0-9]/g, "")}`}>{currentLoc.phone}</a>
-                  </p>
-                  <div className="loc-services">
-                    {currentLoc.services.map((s) => <span key={s} className="chip-static">{s}</span>)}
-                  </div>
-                  <div className="loc-detail-actions">
-                    <a className="btn btn-primary" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentLoc.address)}`} target="_blank" rel="noreferrer">{t.locations.directions} ↗</a>
-                    <a className="btn btn-ghost" href={`tel:${currentLoc.phone.replace(/[^0-9]/g, "")}`}>{t.locations.call}</a>
-                    <button className="btn btn-terracotta" onClick={() => openBooking({ location: currentLoc.key })}>{t.nav.book}</button>
-                  </div>
-                </div>
-
-                <form className="zip-form" onSubmit={calcDrive}>
-                  <span className="font-mono small-label">{t.locations.drive_label}</span>
-                  <div className="zip-input">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="\d{5}"
-                      maxLength={5}
-                      placeholder={t.locations.drive_placeholder}
-                      value={zip}
-                      onChange={(e) => setZip(e.target.value.replace(/[^0-9]/g, "").slice(0, 5))}
-                      aria-label={t.locations.drive_placeholder}
-                    />
-                    <button className="btn btn-primary" type="submit">{t.locations.drive_button}</button>
-                  </div>
-                  {zipDriveTime !== null && zipDriveTime !== "invalid" && (
-                    <p className="zip-result"><strong className="font-display">{zipDriveTime} min</strong> from {zip} to nearest clinic, {currentLoc.name}.</p>
-                  )}
-                  {zipDriveTime === "invalid" && (
-                    <p className="zip-result error">Enter a 5-digit ZIP code.</p>
-                  )}
-                </form>
-              </div>
-
-              <div className="locations-map-wrap">
-                <LocationsMap locations={LOCATIONS} activeKey={activeLoc} onPick={setActiveLoc} />
-                <div className="locations-meta">
-                  <span className="font-mono small-label">DELTA · ARKANSAS</span>
-                  <strong className="font-display">{LOCATIONS.length} clinics. One care team.</strong>
-                </div>
-              </div>
             </div>
           </div>
         </section>
@@ -1192,9 +1195,9 @@ const styles = `
 .trust-pill { display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(252,248,238,0.08); border: 1px solid rgba(252,248,238,0.18); color: rgba(252,248,238,0.92); padding: 0.45rem 0.85rem; border-radius: 999px; font-size: 0.82rem; font-weight: 500; }
 .trust-pill svg { color: var(--terracotta-pale); }
 
-.section-headline { font-size: clamp(2rem, 4.4vw, 4.4rem); line-height: 1.04; color: var(--forest-deep); margin: 0.6rem 0 0; max-width: 16ch; font-weight: 400; letter-spacing: -0.022em; }
+.section-headline { font-size: clamp(1.9rem, 4vw, 3.6rem); line-height: 1.06; color: var(--forest-deep); margin: 0.6rem 0 0; max-width: 16ch; font-weight: 400; letter-spacing: -0.022em; }
 .section-headline em { color: var(--terracotta-deep); font-style: italic; font-weight: 400; }
-.section-head { display: grid; grid-template-columns: 1fr 1.1fr; gap: 3rem; align-items: end; margin-bottom: 3rem; }
+.section-head { display: grid; grid-template-columns: 1fr 1.1fr; gap: 2rem; align-items: end; margin-bottom: 2rem; }
 
 /* ============= NAV ============= */
 .nav { position: sticky; top: 0; z-index: 40; backdrop-filter: blur(16px); background: rgba(248, 244, 236, 0.78); border-bottom: 1px solid transparent; transition: 280ms ease; }
@@ -1205,58 +1208,176 @@ const styles = `
 .nav-links button, .nav-links a { background: none; border: none; cursor: pointer; color: inherit; font: inherit; padding: 0; transition: color 200ms; }
 .nav-links button:hover, .nav-links a:hover { color: var(--forest); }
 .nav-cta { padding: 0.7rem 1.3rem; min-height: 44px; }
-.nav-lang { border: 1px solid var(--line-strong); border-radius: 999px; padding: 0.4rem 0.8rem; font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; letter-spacing: 0.12em; min-height: 36px; }
+.nav-lang-group { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.35rem 0.7rem; border: 1px solid var(--line-strong); border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; letter-spacing: 0.12em; }
+.nav-lang-group button { background: none; border: none; cursor: pointer; padding: 0.18rem 0.32rem; color: var(--ink-mute); font: inherit; transition: 200ms ease; min-height: 28px; border-radius: 999px; }
+.nav-lang-group button:hover { color: var(--forest); }
+.nav-lang-group .nav-lang-active { color: var(--forest); background: var(--ivory-deep); }
+.nav-lang-group span { color: var(--ink-mute); opacity: 0.5; }
 .nav-toggle { display: none; flex-direction: column; gap: 4px; background: none; border: 1px solid var(--line-strong); border-radius: 10px; padding: 0.55rem 0.65rem; cursor: pointer; min-height: 44px; }
 .nav-toggle span { width: 20px; height: 2px; background: var(--forest); border-radius: 2px; }
 
-/* ============= HERO V2 ============= */
-.hero-v2 { background: var(--forest-deep); color: var(--bone); position: relative; min-height: calc(100vh - 78px); overflow: hidden; }
-.hero-v2-grid { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 78px); }
-.hero-v2-left { display: flex; flex-direction: column; justify-content: center; padding: 4rem 4rem 4rem 5vw; gap: 1.6rem; position: relative; z-index: 2; }
-.hero-v2-meta { display: flex; align-items: center; gap: 1rem; color: rgba(252,248,238,0.7); font-size: 0.78rem; flex-wrap: wrap; letter-spacing: 0.18em; }
-.hero-v2-meta .font-mono { letter-spacing: 0.18em; }
-.hero-v2-headline { font-size: clamp(2.6rem, 8.5vw, 9rem); line-height: 0.94; color: var(--bone); font-weight: 400; letter-spacing: -0.03em; margin: 0; }
-.hero-v2-headline em { color: var(--terracotta-pale); font-style: italic; font-weight: 400; }
-.hero-v2-lead { color: rgba(252,248,238,0.8); font-size: 1.12rem; line-height: 1.7; max-width: 50ch; margin: 0; }
-.hero-v2-actions { display: flex; gap: 1.4rem; align-items: center; flex-wrap: wrap; margin-top: 0.4rem; }
-.hero-v2-foot { display: flex; gap: 2.4rem; padding-top: 2rem; border-top: 1px solid rgba(252,248,238,0.14); margin-top: 1.4rem; flex-wrap: wrap; }
-.hero-v2-foot div { display: flex; flex-direction: column; gap: 0.15rem; }
-.hero-v2-foot strong { font-size: 1.6rem; color: var(--bone); font-weight: 400; }
-.hero-v2-foot span { color: rgba(252,248,238,0.6); font-size: 0.82rem; letter-spacing: 0.04em; }
-
-.hero-v2-right { position: relative; overflow: hidden; background: var(--forest-deep); }
-.hero-v2-photo { position: absolute; inset: 0; margin: 0; }
-.hero-v2-photo img,
-.hero-v2-photo video {
+/* ============= HERO V2 — FULL-BLEED VIDEO ============= */
+.hero-v2 {
+  position: relative;
+  min-height: calc(100vh - 78px);
+  color: var(--bone);
+  overflow: hidden;
+  background: var(--forest-deep);
+  isolation: isolate;
+}
+.hero-v2-bg { position: absolute; inset: 0; z-index: 0; }
+.hero-v2-bg img,
+.hero-v2-bg video {
   width: 100%; height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
-  filter: saturate(1.05) contrast(1.04);
+  filter: saturate(1.06) contrast(1.04);
+  transform: scale(1.18);
+  transform-origin: center center;
 }
 .hero-v2-video { will-change: transform; }
-.hero-v2-photo::after {
-  content: "";
+.hero-v2-veil {
   position: absolute; inset: 0;
-  background: linear-gradient(120deg, rgba(12,24,18,0.35) 0%, rgba(12,24,18,0.05) 35%, rgba(12,24,18,0) 100%);
+  background:
+    linear-gradient(105deg,
+      rgba(12,24,18,0.92) 0%,
+      rgba(12,24,18,0.78) 25%,
+      rgba(12,24,18,0.5) 45%,
+      rgba(12,24,18,0.18) 65%,
+      rgba(12,24,18,0.05) 100%
+    ),
+    linear-gradient(0deg, rgba(12,24,18,0.55) 0%, rgba(12,24,18,0.0) 35%, rgba(12,24,18,0) 65%, rgba(12,24,18,0.35) 100%);
   pointer-events: none;
 }
-.hero-v2-figcap { position: absolute; bottom: 1.6rem; right: 1.6rem; background: rgba(14,28,20,0.7); color: var(--bone); padding: 0.45rem 0.8rem; border-radius: 999px; font-size: 0.7rem; letter-spacing: 0.18em; backdrop-filter: blur(8px); }
-.hero-v2-card { position: absolute; left: 2rem; top: 2rem; background: var(--bone); color: var(--ink); padding: 1.1rem 1.3rem; border-radius: 18px; box-shadow: var(--shadow-strong); display: grid; gap: 0.4rem; max-width: 280px; border: 1px solid var(--line); }
+.hero-v2-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(140% 90% at 30% 50%, rgba(12,24,18,0.0) 0%, rgba(12,24,18,0.15) 60%, rgba(12,24,18,0.55) 100%);
+  pointer-events: none;
+}
+
+.hero-v2-content {
+  position: relative;
+  z-index: 2;
+  min-height: calc(100vh - 78px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5rem 0 4rem;
+  gap: 1.5rem;
+  max-width: min(1240px, calc(100% - 2.4rem));
+}
+
+.hero-v2-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(252,248,238,0.78);
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  letter-spacing: 0.18em;
+}
+.hero-v2-meta .font-mono { letter-spacing: 0.18em; }
+
+.hero-v2-headline {
+  font-size: clamp(2.4rem, 8.2vw, 8.4rem);
+  line-height: 0.95;
+  color: var(--bone);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin: 0;
+  max-width: 16ch;
+  text-shadow: 0 2px 30px rgba(0,0,0,0.25);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+.hero-v2-headline em {
+  color: var(--terracotta-pale);
+  font-style: italic;
+  font-weight: 400;
+  padding-right: 0.06em;
+}
+
+.hero-v2-lead {
+  color: rgba(252,248,238,0.92);
+  font-size: 1.12rem;
+  line-height: 1.7;
+  max-width: 52ch;
+  margin: 0;
+  text-shadow: 0 1px 16px rgba(0,0,0,0.4);
+}
+
+.hero-v2-actions {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+.hero-v2-actions .btn-light {
+  background: rgba(252,248,238,0.08);
+  border-color: rgba(252,248,238,0.28);
+  backdrop-filter: blur(10px);
+}
+.hero-v2-actions .btn-light:hover {
+  background: rgba(252,248,238,0.16);
+  border-color: rgba(252,248,238,0.48);
+}
+
+.hero-v2-foot {
+  display: flex;
+  gap: 2.6rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(252,248,238,0.18);
+  margin-top: 1.6rem;
+  flex-wrap: wrap;
+  max-width: 700px;
+}
+.hero-v2-foot div { display: flex; flex-direction: column; gap: 0.18rem; }
+.hero-v2-foot strong { font-size: 1.7rem; color: var(--bone); font-weight: 400; }
+.hero-v2-foot span { color: rgba(252,248,238,0.65); font-size: 0.84rem; letter-spacing: 0.04em; }
+
+.hero-v2-card {
+  position: absolute;
+  right: max(2.4rem, calc((100% - 1240px) / 2 + 1.2rem));
+  bottom: 5rem;
+  background: rgba(252,248,238,0.96);
+  color: var(--ink);
+  padding: 1.2rem 1.4rem;
+  border-radius: 22px;
+  box-shadow: var(--shadow-strong);
+  display: grid;
+  gap: 0.45rem;
+  max-width: 280px;
+  border: 1px solid rgba(252,248,238,0.4);
+  backdrop-filter: blur(14px);
+}
 .hero-v2-card strong { font-size: 1.05rem; color: var(--forest-deep); }
-.hero-v2-card-btn { background: var(--forest); color: var(--bone); border: none; padding: 0.55rem 0.95rem; border-radius: 999px; font-weight: 600; cursor: pointer; align-self: flex-start; min-height: 36px; }
+.hero-v2-card-btn {
+  background: var(--forest);
+  color: var(--bone);
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  min-height: 38px;
+}
 .hero-v2-card-btn:hover { background: var(--forest-deep); }
 
 /* ============= PULL QUOTE ============= */
-.pullquote { padding: 8rem 0 7rem; background: var(--sand-soft); position: relative; }
-.pullquote-text { font-size: clamp(1.8rem, 5.5vw, 5.4rem); line-height: 1.04; color: var(--forest-deep); max-width: 22ch; margin: 0 0 2.4rem; font-weight: 400; letter-spacing: -0.022em; }
+.pullquote { padding: 5rem 0 4.4rem; background: var(--sand-soft); position: relative; }
+.pullquote-text { font-size: clamp(1.7rem, 4.8vw, 4.4rem); line-height: 1.05; color: var(--forest-deep); max-width: 22ch; margin: 0 0 1.8rem; font-weight: 400; letter-spacing: -0.022em; }
 .pullquote-text em { color: var(--terracotta-deep); font-style: italic; font-weight: 400; }
 .pullquote-mark { color: var(--terracotta); font-size: 2em; line-height: 0; position: relative; top: 0.2em; margin-right: 0.06em; }
 .pullquote-attribution { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
 .pullquote-attribution .small-label { color: var(--ink-mute); }
 
 /* ============= INTENT ROUTER ============= */
-.intent-router { padding: 6rem 0 5rem; background: var(--ivory); border-bottom: 1px solid var(--line); }
-.intent-head { text-align: left; max-width: 60ch; margin-bottom: 2.6rem; }
+.intent-router { padding: 4rem 0 3.6rem; background: var(--ivory); border-bottom: 1px solid var(--line); }
+.intent-head { text-align: left; max-width: 60ch; margin-bottom: 2rem; }
 .intent-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .intent-card { background: var(--bone); border: 1px solid var(--line); border-radius: 28px; padding: 1.8rem; text-align: left; cursor: pointer; display: grid; gap: 0.7rem; box-shadow: var(--shadow-soft); position: relative; }
 .intent-num { position: absolute; top: 1.2rem; right: 1.4rem; color: var(--ink-mute); opacity: 0.5; font-size: 1.5rem; }
@@ -1273,20 +1394,20 @@ const styles = `
 .insurance-strip a { color: var(--terracotta-pale); font-weight: 600; }
 
 /* ============= STATS AS ART ============= */
-.stats-art { background: linear-gradient(160deg, #0c1812 0%, #1a3329 60%, #294438 100%); color: var(--bone); padding: 8rem 0; position: relative; overflow: hidden; }
+.stats-art { background: linear-gradient(160deg, #0c1812 0%, #1a3329 60%, #294438 100%); color: var(--bone); padding: 5rem 0 4.4rem; position: relative; overflow: hidden; }
 .stats-art::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 20%, rgba(194,102,74,0.15), transparent 50%), radial-gradient(circle at 80% 80%, rgba(110,139,120,0.18), transparent 55%); pointer-events: none; }
-.stats-art-head { display: grid; grid-template-columns: auto 1fr; gap: 2rem; align-items: end; margin-bottom: 4rem; }
-.stats-art-head h2 { font-size: clamp(2rem, 4vw, 3.6rem); line-height: 1.06; color: var(--bone); margin: 0; max-width: 22ch; font-weight: 400; }
+.stats-art-head { display: grid; grid-template-columns: auto 1fr; gap: 2rem; align-items: end; margin-bottom: 2.4rem; }
+.stats-art-head h2 { font-size: clamp(1.8rem, 3.4vw, 3rem); line-height: 1.06; color: var(--bone); margin: 0; max-width: 22ch; font-weight: 400; }
 .stats-art-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid rgba(252,248,238,0.12); }
-.stat-art { padding: 3rem 2rem; border-bottom: 1px solid rgba(252,248,238,0.12); border-right: 1px solid rgba(252,248,238,0.12); display: grid; grid-template-columns: auto 1fr; gap: 2rem; align-items: end; }
+.stat-art { padding: 2.2rem 2rem; border-bottom: 1px solid rgba(252,248,238,0.12); border-right: 1px solid rgba(252,248,238,0.12); display: grid; grid-template-columns: auto 1fr; gap: 1.6rem; align-items: end; }
 .stat-art:nth-child(2n) { border-right: none; }
 .stat-art:nth-last-child(-n+2) { border-bottom: none; }
-.stat-art strong { font-size: clamp(5rem, 14vw, 12rem); line-height: 0.85; color: var(--bone); font-weight: 400; letter-spacing: -0.05em; }
-.stat-art span { color: rgba(252,248,238,0.65); display: block; margin-bottom: 0.5rem; }
-.stat-art p { color: rgba(252,248,238,0.78); margin: 0; font-size: 1rem; line-height: 1.55; max-width: 36ch; }
+.stat-art strong { font-size: clamp(4rem, 11vw, 9rem); line-height: 0.86; color: var(--bone); font-weight: 400; letter-spacing: -0.05em; }
+.stat-art span { color: rgba(252,248,238,0.65); display: block; margin-bottom: 0.4rem; }
+.stat-art p { color: rgba(252,248,238,0.78); margin: 0; font-size: 0.96rem; line-height: 1.55; max-width: 36ch; }
 
 /* ============= URGENT VS ER ============= */
-.urgent-er { padding: 7rem 0; }
+.urgent-er { padding: 4.4rem 0; }
 .urgent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
 .urgent-card { position: relative; background: var(--bone); border: 1px solid var(--line); border-radius: 30px; padding: 2.4rem; }
 .urgent-uc { background: linear-gradient(180deg, var(--sand-soft), var(--bone)); border-color: rgba(176,136,56,0.4); }
@@ -1299,7 +1420,7 @@ const styles = `
 .urgent-promise { margin: 2.4rem 0 0; text-align: center; font-size: clamp(1.1rem, 2vw, 1.5rem); color: var(--forest-deep); font-style: italic; max-width: 36ch; margin-inline: auto; }
 
 /* ============= SERVICES ============= */
-.services-section { padding: 7rem 0; background: var(--ivory-deep); }
+.services-section { padding: 4.4rem 0; background: var(--ivory-deep); }
 .services-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; }
 .service-card { background: var(--bone); border: 1px solid var(--line); border-radius: 26px; padding: 2rem; box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 0.8rem; position: relative; }
 .service-num { position: absolute; top: 1.4rem; right: 1.6rem; color: var(--ink-mute); opacity: 0.4; font-size: 1.2rem; letter-spacing: 0; }
@@ -1309,7 +1430,7 @@ const styles = `
 .service-link:hover { color: var(--terracotta-deep); }
 
 /* ============= WOUND DRENCHED ============= */
-.wound-drenched { padding: 7rem 0; background: linear-gradient(140deg, #a04e36 0%, #c2664a 50%, #d56e4f 100%); color: var(--bone); position: relative; overflow: hidden; }
+.wound-drenched { padding: 5rem 0; background: linear-gradient(140deg, #a04e36 0%, #c2664a 50%, #d56e4f 100%); color: var(--bone); position: relative; overflow: hidden; }
 .wound-drenched::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle at 80% 30%, rgba(255,255,255,0.18), transparent 50%); pointer-events: none; }
 .wound-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; position: relative; z-index: 1; }
 .wound-list { list-style: none; padding: 0; margin: 1.4rem 0 2rem; display: grid; gap: 0.6rem; }
@@ -1329,7 +1450,7 @@ const styles = `
 .ba-hint { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); padding: 0.36rem 0.85rem; border-radius: 999px; background: rgba(255,255,255,0.92); color: var(--ink-soft); font-size: 0.75rem; pointer-events: none; }
 
 /* ============= TEAM ============= */
-.team { padding: 7rem 0; background: var(--ivory); }
+.team { padding: 4.4rem 0; background: var(--ivory); }
 .filter-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 2.4rem; }
 .chip { border: 1px solid var(--line-strong); background: transparent; border-radius: 999px; padding: 0.6rem 1rem; font-size: 0.86rem; color: var(--ink-soft); cursor: pointer; transition: 200ms ease; min-height: 44px; }
 .chip:hover { border-color: var(--forest); color: var(--forest); }
@@ -1338,8 +1459,21 @@ const styles = `
 .team-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; }
 .provider-card { background: var(--bone); border: 1px solid var(--line); border-radius: 28px; overflow: hidden; cursor: pointer; box-shadow: var(--shadow-soft); }
 .provider-photo { position: relative; aspect-ratio: 4 / 5; overflow: hidden; }
-.provider-photo img { width: 100%; height: 100%; object-fit: cover; transform: scale(1); transition: 700ms cubic-bezier(0.22,1,0.36,1); filter: saturate(0.95); }
-.provider-card:hover .provider-photo img { transform: scale(1.06); filter: saturate(1.05); }
+.provider-photo { background: var(--forest); }
+.provider-photo img {
+  width: 100%; height: 100%; object-fit: cover;
+  transform: scale(1);
+  transition: 700ms cubic-bezier(0.22,1,0.36,1);
+  filter: grayscale(0.92) contrast(1.06) brightness(0.96);
+  mix-blend-mode: luminosity;
+  opacity: 0.95;
+}
+.provider-card:hover .provider-photo img {
+  transform: scale(1.04);
+  filter: grayscale(0.4) contrast(1.04) brightness(1.0);
+  mix-blend-mode: normal;
+  opacity: 1;
+}
 .provider-photo-veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,35,25,0) 50%, rgba(20,35,25,0.5) 100%); }
 .provider-pill { position: absolute; top: 1rem; left: 1rem; background: rgba(176,136,56,0.95); color: var(--bone); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.34rem 0.75rem; border-radius: 999px; backdrop-filter: blur(6px); font-weight: 700; }
 .provider-num { position: absolute; bottom: 1rem; right: 1rem; color: rgba(252,248,238,0.78); font-size: 0.7rem; letter-spacing: 0.12em; }
@@ -1349,7 +1483,7 @@ const styles = `
 .provider-specialty { font-size: 0.8rem; color: var(--ink-mute); }
 
 /* ============= LOCATIONS ============= */
-.locations { padding: 7rem 0; background: var(--ivory-deep); }
+.locations { padding: 4.4rem 0; background: var(--ivory-deep); }
 .locations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
 .locations-side { display: flex; flex-direction: column; gap: 1.4rem; }
 .loc-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
@@ -1378,14 +1512,14 @@ const styles = `
 .locations-meta strong { color: var(--forest); font-size: 1rem; font-weight: 400; }
 
 /* ============= RECOGNITIONS ============= */
-.recognitions { padding: 5rem 0; background: var(--forest-deep); color: var(--bone); }
+.recognitions { padding: 3.4rem 0; background: var(--forest-deep); color: var(--bone); }
 .recognition-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.8rem; margin-top: 1.4rem; }
 .rec-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 1.2rem; }
 .rec-card strong { display: block; color: var(--bone); font-size: 1.05rem; margin-bottom: 0.4rem; font-weight: 400; }
 .rec-card span { color: rgba(252,248,238,0.7); font-size: 0.84rem; line-height: 1.55; }
 
 /* ============= FOUNDER ============= */
-.founder { padding: 7rem 0; background: var(--bone); }
+.founder { padding: 4.4rem 0; background: var(--bone); }
 .founder-grid { display: grid; grid-template-columns: 0.6fr 1fr; gap: 4rem; align-items: center; }
 .founder-photo { margin: 0; border-radius: 28px; overflow: hidden; aspect-ratio: 4 / 5; box-shadow: var(--shadow-strong); }
 .founder-photo img { width: 100%; height: 100%; object-fit: cover; }
@@ -1395,7 +1529,7 @@ const styles = `
 .founder-sig span { color: var(--ink-mute); font-size: 0.9rem; }
 
 /* ============= TESTIMONIALS ============= */
-.testimonials { padding: 7rem 0; background: linear-gradient(140deg, #0c1812 0%, #1a3329 50%, #294438 100%); color: var(--bone); position: relative; overflow: hidden; }
+.testimonials { padding: 4.4rem 0; background: linear-gradient(140deg, #0c1812 0%, #1a3329 50%, #294438 100%); color: var(--bone); position: relative; overflow: hidden; }
 .testimonials::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle at 20% 30%, rgba(232,160,133,0.18), transparent 60%), radial-gradient(circle at 80% 70%, rgba(110,139,120,0.18), transparent 60%); pointer-events: none; }
 .testimonials-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 4rem; align-items: center; position: relative; z-index: 1; }
 .t-rating { display: flex; align-items: center; gap: 0.7rem; margin: 0.8rem 0 1rem; }
@@ -1422,15 +1556,11 @@ const styles = `
 .faq-link:hover { color: var(--forest); }
 
 /* PROVIDER PHOTO NORMALIZATION (subtle, doesn't kill the photo) */
-.provider-photo img {
-  filter: saturate(0.92) contrast(1.02) brightness(1.02);
-}
 .provider-photo::after {
   content: "";
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(26,51,41,0) 60%, rgba(26,51,41,0.18) 100%);
+  background: linear-gradient(180deg, rgba(26,51,41,0.18) 0%, rgba(26,51,41,0) 30%, rgba(26,51,41,0) 60%, rgba(26,51,41,0.55) 100%);
   pointer-events: none;
-  mix-blend-mode: multiply;
 }
 
 /* FOOTER COMPLIANCE */
@@ -1439,7 +1569,7 @@ const styles = `
 .footer-compliance .lead { color: rgba(252,248,238,0.62); font-size: 0.84rem; max-width: 100%; line-height: 1.6; }
 
 /* ============= RESOURCES ============= */
-.resources { padding: 7rem 0; }
+.resources { padding: 4.4rem 0; }
 .resources-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem; }
 .resource-card { background: var(--bone); border: 1px solid var(--line); border-radius: 26px; padding: 1.5rem; box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 0.6rem; cursor: pointer; }
 .resource-img { aspect-ratio: 16 / 10; border-radius: 18px; overflow: hidden; background: var(--ivory-deep); }
@@ -1448,7 +1578,7 @@ const styles = `
 .resource-card h3 { margin: 0; color: var(--forest-deep); font-size: 1.18rem; font-weight: 400; }
 
 /* ============= FAQ ============= */
-.faq { padding: 7rem 0; background: var(--ivory-deep); }
+.faq { padding: 4.4rem 0; background: var(--ivory-deep); }
 .faq-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 4rem; align-items: start; }
 .faq-image { margin-top: 1.5rem; border-radius: 22px; box-shadow: var(--shadow-card); width: 100%; height: auto; }
 .faq-list { display: grid; gap: 0.5rem; }
@@ -1460,13 +1590,13 @@ const styles = `
 .faq-item.is-open .faq-a { max-height: 360px; padding: 0 1.4rem 1.4rem; }
 
 /* ============= CAREERS ============= */
-.careers { padding: 7rem 0; }
+.careers { padding: 4.4rem 0; }
 .careers-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 4rem; align-items: center; }
 .careers-photo { margin: 0; border-radius: 28px; overflow: hidden; aspect-ratio: 5 / 4; box-shadow: var(--shadow-card); }
 .careers-photo img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ============= CTA ============= */
-.cta { padding: 7rem 0 9rem; }
+.cta { padding: 5rem 0 6rem; }
 .cta-card { position: relative; background: linear-gradient(120deg, #0c1812 0%, #1a3329 50%, #3f6353 100%); color: var(--bone); border-radius: 40px; padding: 4.5rem; display: grid; grid-template-columns: 1.3fr auto; gap: 2rem; align-items: center; overflow: hidden; isolation: isolate; }
 .cta-card h2 { font-size: clamp(2.2rem, 4.4vw, 4rem); line-height: 1.04; margin: 0.8rem 0 1rem; max-width: 16ch; font-weight: 400; }
 .cta-card h2 em { font-style: italic; font-weight: 400; }
@@ -1606,45 +1736,42 @@ const styles = `
 }
 
 @media (max-width: 720px) {
-  /* HERO REIMAGINED FOR MOBILE */
-  .hero-v2 { min-height: auto; }
-  .hero-v2-grid { display: block; min-height: auto; position: relative; }
-  .hero-v2-right {
-    position: absolute; inset: 0;
-    aspect-ratio: auto;
-    min-height: 100vh;
-    z-index: 0;
+  /* HERO MOBILE */
+  .hero-v2 { min-height: 100vh; }
+  .hero-v2-bg img,
+  .hero-v2-bg video {
+    filter: saturate(1.05) contrast(1.04) brightness(0.82);
+    transform: scale(1.25);
   }
-  .hero-v2-photo { position: absolute; inset: 0; }
-  .hero-v2-photo img,
-  .hero-v2-photo video { filter: saturate(1.05) contrast(1.05) brightness(0.78); }
-  .hero-v2-figcap { display: none; }
-  .hero-v2-card {
-    left: 1rem; top: auto; bottom: auto; right: auto;
-    position: absolute; top: 1.2rem; right: 1.2rem; left: auto;
-    max-width: 200px; padding: 0.85rem 1rem;
+  .hero-v2-veil {
+    background:
+      linear-gradient(180deg, rgba(12,24,18,0.55) 0%, rgba(12,24,18,0.35) 30%, rgba(12,24,18,0.7) 70%, rgba(12,24,18,0.95) 100%);
   }
-  .hero-v2-card strong { font-size: 0.95rem; }
-  .hero-v2-card-btn { padding: 0.45rem 0.8rem; font-size: 0.85rem; min-height: 32px; }
-  .hero-v2-left {
-    position: relative; z-index: 2;
-    background: linear-gradient(180deg, rgba(12,24,18,0) 0%, rgba(12,24,18,0.4) 30%, rgba(12,24,18,0.85) 75%, rgba(12,24,18,0.96) 100%);
-    padding: 36vh 1.4rem 2rem;
+  .hero-v2-vignette { display: none; }
+  .hero-v2-content {
     min-height: 100vh;
-    gap: 1rem;
+    padding: 4.5rem 0 2rem;
     justify-content: flex-end;
+    gap: 1rem;
   }
-  .hero-v2-meta { font-size: 0.7rem; gap: 0.8rem; }
+  .hero-v2-meta { font-size: 0.7rem; gap: 0.7rem; }
   .hero-v2-headline {
-    font-size: clamp(2.4rem, 14vw, 4.4rem);
-    line-height: 0.96;
-    max-width: 14ch;
+    font-size: clamp(2rem, 10.5vw, 3.6rem);
+    line-height: 0.98;
+    max-width: 100%;
   }
+  .hero-v2-headline em { padding-right: 0.04em; }
   .hero-v2-lead { font-size: 1rem; line-height: 1.6; max-width: 100%; }
-  .hero-v2-actions { gap: 0.7rem; flex-direction: column; align-items: stretch; }
+  .hero-v2-actions { gap: 0.6rem; flex-direction: column; align-items: stretch; }
   .hero-v2-actions .btn { width: 100%; min-height: 56px; font-size: 1rem; }
-  .hero-v2-actions .btn-text { padding: 0.5rem 0; align-self: flex-start; }
-  .hero-v2-foot { display: none; }
+  .hero-v2-foot {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem 1rem;
+    padding-top: 1.2rem;
+    margin-top: 0.8rem;
+  }
+  .hero-v2-foot strong { font-size: 1.4rem; }
+  .hero-v2-card { display: none; }
 
   /* PULL QUOTE */
   .pullquote { padding: 4.5rem 0; }
@@ -1853,6 +1980,5 @@ const styles = `
 
 @media (max-width: 480px) {
   .container { width: calc(100% - 1.6rem); }
-  .hero-v2-card { display: none; }
 }
 `;

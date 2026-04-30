@@ -37,7 +37,7 @@ const STRINGS = {
       stats_pcmh: "Level 3 Certified",
     },
     intent: {
-      eyebrow: "Get care in 30 seconds",
+      eyebrow: "Where to start",
       title: "What brings you in today?",
       sick: { t: "I am sick today", d: "Same-day urgent care for illness and minor injuries.", cta: "Reserve urgent slot" },
       primary: { t: "I need a primary doctor", d: "Match with a provider who takes your insurance and your pace.", cta: "Find my doctor" },
@@ -231,7 +231,7 @@ const STRINGS = {
       stats_pcmh: "Nivel 3 Certificado",
     },
     intent: {
-      eyebrow: "Atención en 30 segundos",
+      eyebrow: "Por dónde empezar",
       title: "¿Qué le trae hoy?",
       sick: { t: "Estoy enfermo hoy", d: "Atención urgente el mismo día para enfermedades y lesiones menores.", cta: "Reservar urgencias" },
       primary: { t: "Necesito médico de cabecera", d: "Encuentre un proveedor que acepte su seguro y su ritmo.", cta: "Encontrar médico" },
